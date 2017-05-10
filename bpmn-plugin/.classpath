@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="D:/Programs/vp files/openapi.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/D:/Programs/vp%20files/vp-plugin-javadoc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Grzegorz/Desktop/Visual_Paradigm_14_0_20170403_Win64_InstallFree/Visual Paradigm 14.0/Application/lib/lib01.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Grzegorz/Desktop/Visual_Paradigm_14_0_20170403_Win64_InstallFree/Visual Paradigm 14.0/Application/lib/lib02.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Grzegorz/Desktop/Visual_Paradigm_14_0_20170403_Win64_InstallFree/Visual Paradigm 14.0/Application/lib/lib03.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Grzegorz/Desktop/Visual_Paradigm_14_0_20170403_Win64_InstallFree/Visual Paradigm 14.0/Application/lib/lib04.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Grzegorz/Desktop/Visual_Paradigm_14_0_20170403_Win64_InstallFree/Visual Paradigm 14.0/Application/lib/lib05.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Grzegorz/Desktop/Visual_Paradigm_14_0_20170403_Win64_InstallFree/Visual Paradigm 14.0/Application/lib/lib06.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Grzegorz/Desktop/Visual_Paradigm_14_0_20170403_Win64_InstallFree/Visual Paradigm 14.0/Application/lib/lib07.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Grzegorz/Desktop/Visual_Paradigm_14_0_20170403_Win64_InstallFree/Visual Paradigm 14.0/Application/lib/lib09.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Grzegorz/Desktop/Visual_Paradigm_14_0_20170403_Win64_InstallFree/Visual Paradigm 14.0/Application/lib/vpplatform.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Grzegorz/Desktop/Visual_Paradigm_14_0_20170403_Win64_InstallFree/Visual Paradigm 14.0/Application/lib/jniwrap.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Grzegorz/Desktop/Visual_Paradigm_14_0_20170403_Win64_InstallFree/Visual Paradigm 14.0/Application/lib/winpack.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Grzegorz/Desktop/Visual_Paradigm_14_0_20170403_Win64_InstallFree/Visual Paradigm 14.0/Application/ormlib/orm.jar"/>
+	<classpathentry kind="output" path="classes"/>
+</classpath>
