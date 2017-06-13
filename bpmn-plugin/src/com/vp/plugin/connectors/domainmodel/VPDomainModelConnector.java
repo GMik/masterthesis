@@ -4,20 +4,29 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import com.vp.plugin.ApplicationManager;
 import com.vp.plugin.ProjectManager;
+import com.vp.plugin.connectors.domainmodel.br.DomainModelSBVRRelevantElementsContainer;
+import com.vp.plugin.connectors.domainmodel.br.TermsAndClassFacts;
+import com.vp.plugin.connectors.domainmodel.br.facts.ClassFact;
+import com.vp.plugin.connectors.domainmodel.br.facts.Fact;
+import com.vp.plugin.connectors.domainmodel.br.facts.RelationshipFact;
+import com.vp.plugin.connectors.domainmodel.br.facts.RelationshipFact.RelationshipFactBuilder;
+import com.vp.plugin.connectors.domainmodel.br.terms.Term;
+import com.vp.plugin.model.IAssociation;
+import com.vp.plugin.model.IAssociationEnd;
+import com.vp.plugin.model.IAttribute;
 import com.vp.plugin.model.IClass;
 import com.vp.plugin.model.IModelElement;
 import com.vp.plugin.model.IState2;
 import com.vp.plugin.model.factory.IModelElementFactory;
 
 public class VPDomainModelConnector implements IVPDomainModelConnector {
-
-	// TODO: fetch not only from Stat2, but also from Class
 
 	@Override
 	public List<StateMachine> fetchStateMachines() {
@@ -39,18 +48,107 @@ public class VPDomainModelConnector implements IVPDomainModelConnector {
 		return stateMachines;
 	}
 
-	private Map<IClass, List<IState2>> fetchClassesWithStates() {
+	@Override
+	public Set<IClass> fetchClasses() {
+		Set<IClass> result = new HashSet<>();
 
-		Map<String, List<IState2>> classesIdsToStates = fetchClassesWithStatesHelpMethod();
-		Map<IClass, List<IState2>> classesToStates = new HashMap<>();
+		IModelElement[] classes = ApplicationManager.instance().getProjectManager().getProject()
+				.toAllLevelModelElementArray(IModelElementFactory.MODEL_TYPE_CLASS);
 
-		for (Map.Entry<String, List<IState2>> entry : classesIdsToStates.entrySet()) {
+		for (IModelElement _class : classes) {
+			result.add((IClass) _class);
+		}
+		return result;
+	}
 
-			classesToStates.put((IClass) ApplicationManager.instance().getProjectManager().getProject()
-					.getModelElementById(entry.getKey()), entry.getValue());
+	@Override
+	public Set<IClass> fetchClassesWithGivenName(String classname) {
+		Set<IClass> allClasses = fetchClasses();
+		Set<IClass> result = new HashSet<>();
+		for (IClass _class : allClasses) {
+			if (_class.getName().equals(classname)) {
+				result.add(_class);
+			}
+		}
+		return result;
+
+	}
+
+	@Override
+	public DomainModelSBVRRelevantElementsContainer fetchSBVRRelevantElements() {
+		DomainModelSBVRRelevantElementsContainer container = new DomainModelSBVRRelevantElementsContainer();
+
+		List<RelationshipFact> relationshipFacts = fetchRelationshipFacts();
+		TermsAndClassFacts termsAndClassFacts = fetchTermsAndClassFacts();
+
+		container.setRelationshipFacts(relationshipFacts);
+		container.setTerms(termsAndClassFacts.terms);
+		container.setClassFacts(termsAndClassFacts.classFacts);
+
+		return container;
+	}
+
+	@Override
+	public List<Term> fetchTerms() {
+
+		Set<Term> terms = new HashSet<>();
+
+		Set<IClass> classes = fetchClasses();
+		for (IClass clazz : classes) {
+			terms.add(new Term(clazz.getName()));
 		}
 
-		return classesToStates;
+		return new ArrayList<Term>(terms);
+	}
+
+	@Override
+	public List<Fact> fetchFacts() {
+
+		List<Fact> facts = new ArrayList<>();
+
+		List<ClassFact> classFacts = fetchClassFacts();
+		List<RelationshipFact> relationshipFacts = fetchRelationshipFacts();
+
+		facts.addAll(classFacts);
+		facts.addAll(relationshipFacts);
+
+		return facts;
+	}
+
+	private List<ClassFact> fetchClassFacts() {
+		return fetchTermsAndClassFacts().classFacts;
+	}
+
+	private List<RelationshipFact> fetchRelationshipFacts() {
+
+		ProjectManager projectManager = ApplicationManager.instance().getProjectManager();
+		IModelElement[] associations = projectManager.getProject()
+				.toAllLevelModelElementArray(IModelElementFactory.MODEL_TYPE_ASSOCIATION);
+
+		List<RelationshipFact> relationshipFacts = new ArrayList<>();
+
+		for (IModelElement elem : associations) {
+
+			IAssociation association = (IAssociation) elem;
+
+			IAssociationEnd associationEndFrom = (IAssociationEnd) association.getFromEnd();
+			IAssociationEnd associationEndTo = (IAssociationEnd) association.getToEnd();
+
+			String leftClass = associationEndFrom.getEndRelationship().getTo().getName();
+			String rightClass = associationEndFrom.getEndRelationship().getFrom().getName();
+
+			String leftMultiplicity = associationEndFrom.getMultiplicity();
+			String rightMultiplicity = associationEndTo.getMultiplicity();
+
+			RelationshipFact relationshipFact = new RelationshipFactBuilder().leftTerm(new Term(leftClass))
+					.leftMultiplicity(leftMultiplicity).verb(association.getName()).rightMultiplicity(rightMultiplicity)
+					.rightTerm(new Term(rightClass)).build();
+
+			relationshipFacts.add(relationshipFact);
+
+		}
+
+		return relationshipFacts;
 
 	}
 
@@ -66,33 +164,28 @@ public class VPDomainModelConnector implements IVPDomainModelConnector {
 		return classesToStatesForClass;
 	}
 
-	@Override
-	public Set<IClass> fetchClasses() {
-		Set<IClass> result = new HashSet<>();
+	private TermsAndClassFacts fetchTermsAndClassFacts() {
 
-		IModelElement[] classes = ApplicationManager.instance().getProjectManager().getProject()
-				.toAllLevelModelElementArray(IModelElementFactory.MODEL_TYPE_CLASS);
+		TermsAndClassFacts termsAndClassFacts = new TermsAndClassFacts();
 
-		for (IModelElement _class : classes) {
-			result.add((IClass) _class);
-		}
+		Set<IClass> classes = fetchClasses();
+		for (IClass clazz : classes) {
 
-		// result.addAll(fetchAllClassesFromPackages());
-		// result.addAll(fetchClassesFromModel());
-		// result.addAll(fetchClassesFromElements());
-		return result;
-	}
+			// Terms - class names
+			Term term = new Term(clazz.getName());
+			termsAndClassFacts.terms.add(term);
 
-	@Override
-	public Set<IClass> fetchClassesWithGivenName(String classname) {
-		Set<IClass> allClasses = fetchClasses();
-		Set<IClass> result = new HashSet<>();
-		for (IClass _class : allClasses) {
-			if (_class.getName().equals(classname)) {
-				result.add(_class);
+			// Facts - class name + has + attribute
+			Iterator iterator = clazz.attributeIterator();
+			while (iterator.hasNext()) {
+				IAttribute element = (IAttribute) iterator.next();
+				String property = element.getName();
+				ClassFact classFact = new ClassFact(term, property);
+				termsAndClassFacts.classFacts.add(classFact);
 			}
 		}
-		return result;
+
+		return termsAndClassFacts;
 
 	}
 
@@ -114,44 +207,19 @@ public class VPDomainModelConnector implements IVPDomainModelConnector {
 
 	}
 
-	private List<IClass> fetchClassesFrom(String modelType) {
-		List<IClass> result = new ArrayList<>();
-		ProjectManager projectManager = ApplicationManager.instance().getProjectManager();
-		IModelElement[] elements = projectManager.getProject().toModelElementArray(modelType);
-		for (IModelElement element : elements) {
-			if (element instanceof IClass) {
-				result.add((IClass) element);
-			}
+	private Map<IClass, List<IState2>> fetchClassesWithStates() {
+
+		Map<String, List<IState2>> classesIdsToStates = fetchClassesWithStatesHelpMethod();
+		Map<IClass, List<IState2>> classesToStates = new HashMap<>();
+
+		for (Map.Entry<String, List<IState2>> entry : classesIdsToStates.entrySet()) {
+
+			classesToStates.put((IClass) ApplicationManager.instance().getProjectManager().getProject()
+					.getModelElementById(entry.getKey()), entry.getValue());
 		}
-		return result;
-	}
 
-	private List<IClass> fetchClassesFromElements() {
-		return fetchClassesFrom(IModelElementFactory.MODEL_TYPE_CLASS);
-	}
+		return classesToStates;
 
-	private List<IClass> fetchClassesFromModel() {
-		return fetchClassesFrom(IModelElementFactory.MODEL_TYPE_MODEL);
-	}
-
-	private List<IClass> fetchAllClassesFromPackages() {
-		IModelElement[] modelElements = ApplicationManager.instance().getProjectManager().getProject()
-				.toModelElementArray(IModelElementFactory.MODEL_TYPE_PACKAGE);
-		List<IClass> classesAccumulator = new ArrayList<>();
-		for (IModelElement modelElement : modelElements) {
-			fetchAllClassesFromPackagesHelp(modelElement, classesAccumulator);
-		}
-		return classesAccumulator;
-	}
-
-	private static void fetchAllClassesFromPackagesHelp(IModelElement modelElement, List<IClass> accumulator) {
-		for (IModelElement childElement : modelElement.toChildArray()) {
-			if (childElement instanceof IClass) {
-
-				accumulator.add((IClass) childElement);
-			}
-			fetchAllClassesFromPackagesHelp(childElement, accumulator);
-		}
 	}
 
 }

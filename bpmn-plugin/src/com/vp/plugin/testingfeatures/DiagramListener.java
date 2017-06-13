@@ -154,7 +154,7 @@ public class DiagramListener implements IDiagramListener {
 
 		if (validationResult != null) {
 			System.out.println("--------- VALIDATION MESSAGE: " + validationResult.getMessage());
-
+			_viewManager.showMessage(validationResult.getMessage());
 		}
 
 	}

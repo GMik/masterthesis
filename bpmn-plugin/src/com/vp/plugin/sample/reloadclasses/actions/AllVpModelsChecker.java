@@ -5,19 +5,30 @@ import java.util.List;
 
 import com.vp.plugin.ApplicationManager;
 import com.vp.plugin.ProjectManager;
+import com.vp.plugin.connectors.domainmodel.VPDomainModelConnector;
+import com.vp.plugin.connectors.domainmodel.br.DomainModelSBVRRelevantElementsContainer;
 import com.vp.plugin.model.IBPPool;
 import com.vp.plugin.model.IBPTask;
 import com.vp.plugin.model.IBRKeyword;
 import com.vp.plugin.model.IBRKeywords;
 import com.vp.plugin.model.IClass;
+import com.vp.plugin.model.IEndRelationship;
 import com.vp.plugin.model.IGlossary;
 import com.vp.plugin.model.IModel;
 import com.vp.plugin.model.IModelElement;
+import com.vp.plugin.model.IRelationshipEnd;
 import com.vp.plugin.model.factory.IModelElementFactory;
 
 public class AllVpModelsChecker {
 
 	public static void checkSelected() {
+
+		VPDomainModelConnector connector = new VPDomainModelConnector();
+
+		DomainModelSBVRRelevantElementsContainer container = connector.fetchSBVRRelevantElements();
+		// List<Relationship> r = connector.fetchRelationships();
+		// List<Term> t = connector.fetchTerms();
+		// TermsAndClassFacts tasf = connector.fetchTermsAndSimpleFacts();
 
 		ProjectManager projectManager = ApplicationManager.instance().getProjectManager();
 		IModelElement[] models3 = projectManager.getProject()
@@ -50,6 +61,19 @@ public class AllVpModelsChecker {
 
 		for (IModelElement elem : models3) {
 			IClass c = (IClass) elem;
+
+			for (IRelationshipEnd rend : c.toToRelationshipEndArray()) {
+
+				IEndRelationship end = rend.getEndRelationship(); // relacja
+				IRelationshipEnd oppend = rend.getOppositeEnd();
+
+				IModelElement end1 = end.getTo(); // class1
+				IModelElement end2 = end.getFrom();// class2
+
+				String sss = rend.getName();
+
+				System.out.println("here");
+			}
 
 			System.out.println("CLASS: " + c.getName());
 
@@ -99,6 +123,15 @@ public class AllVpModelsChecker {
 
 			g.toTermArray();
 
+		}
+
+		models3 = projectManager.getProject()
+				.toModelElementArray(IModelElementFactory.MODEL_TYPE_MODEL_RELATIONSHIP_CONTAINER);
+
+		for (IModelElement elem : models3) {
+
+			IRelationshipEnd[] rend = elem.toToRelationshipEndArray();
+			System.out.println(rend[0].getName());
 		}
 
 		// System.out.println("############## CLASSES ...");
