@@ -5,7 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
-import com.vp.plugin.connectors.businessrules.IFileSystemConnector;
+import com.vp.plugin.connectors.businessrules.ISBVRFileConnector;
 import com.vp.plugin.model.BusinessRule;
 
 public class BusinessRulesRepositoryImpl implements BusinessRulesRepository {
@@ -15,7 +15,7 @@ public class BusinessRulesRepositoryImpl implements BusinessRulesRepository {
 	 */
 	private String filepath;
 
-	private IFileSystemConnector fileSystemConnector;
+	private ISBVRFileConnector sBVRFileConnector;
 
 	@Override
 	public void create(BusinessRule businessRule) {
