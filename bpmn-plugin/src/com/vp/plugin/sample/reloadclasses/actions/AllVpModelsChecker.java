@@ -1,22 +1,21 @@
 package com.vp.plugin.sample.reloadclasses.actions;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.vp.plugin.ApplicationManager;
 import com.vp.plugin.ProjectManager;
 import com.vp.plugin.connectors.domainmodel.VPDomainModelConnector;
 import com.vp.plugin.connectors.domainmodel.br.DomainModelSBVRRelevantElementsContainer;
-import com.vp.plugin.model.IBPPool;
-import com.vp.plugin.model.IBPTask;
 import com.vp.plugin.model.IBRKeyword;
 import com.vp.plugin.model.IBRKeywords;
+import com.vp.plugin.model.IBusinessRule;
 import com.vp.plugin.model.IClass;
-import com.vp.plugin.model.IEndRelationship;
-import com.vp.plugin.model.IGlossary;
+import com.vp.plugin.model.IFact;
+import com.vp.plugin.model.IFactRole;
+import com.vp.plugin.model.IGlossaryTermAttribute;
 import com.vp.plugin.model.IModel;
 import com.vp.plugin.model.IModelElement;
-import com.vp.plugin.model.IRelationshipEnd;
+import com.vp.plugin.model.ITerm;
 import com.vp.plugin.model.factory.IModelElementFactory;
 
 public class AllVpModelsChecker {
@@ -32,7 +31,7 @@ public class AllVpModelsChecker {
 
 		ProjectManager projectManager = ApplicationManager.instance().getProjectManager();
 		IModelElement[] models3 = projectManager.getProject()
-				.toModelElementArray(IModelElementFactory.MODEL_TYPE_BR_KEYWORDS);
+				.toAllLevelModelElementArray(IModelElementFactory.MODEL_TYPE_BR_KEYWORDS);
 
 		for (IModelElement elem : models3) {
 			IBRKeywords keywords = (IBRKeywords) elem;
@@ -42,44 +41,7 @@ public class AllVpModelsChecker {
 			}
 		}
 
-		models3 = projectManager.getProject().toModelElementArray(IModelElementFactory.MODEL_TYPE_BP_POOL);
-
-		System.out.println("############## BP TASKS ...");
-
-		for (IModelElement elem : models3) {
-			IBPPool pool = (IBPPool) elem;
-
-			IBPTask[] bptasks = pool.toBPTaskArray();
-			for (IBPTask bptask : bptasks) {
-				System.out.println(bptask.getName());
-			}
-		}
-
-		models3 = projectManager.getProject().toModelElementArray(IModelElementFactory.MODEL_TYPE_CLASS);
-
-		System.out.println("############## CLASSES ...");
-
-		for (IModelElement elem : models3) {
-			IClass c = (IClass) elem;
-
-			for (IRelationshipEnd rend : c.toToRelationshipEndArray()) {
-
-				IEndRelationship end = rend.getEndRelationship(); // relacja
-				IRelationshipEnd oppend = rend.getOppositeEnd();
-
-				IModelElement end1 = end.getTo(); // class1
-				IModelElement end2 = end.getFrom();// class2
-
-				String sss = rend.getName();
-
-				System.out.println("here");
-			}
-
-			System.out.println("CLASS: " + c.getName());
-
-		}
-
-		models3 = projectManager.getProject().toModelElementArray(IModelElementFactory.MODEL_TYPE_MODEL);
+		models3 = projectManager.getProject().toAllLevelModelElementArray(IModelElementFactory.MODEL_TYPE_TERM);
 
 		System.out.println("############## MODELS ...");
 
@@ -89,50 +51,191 @@ public class AllVpModelsChecker {
 			for (IModelElement el : m.toChildArray()) {
 				System.out.println("MODEL ELEMENT: " + el.getName());
 			}
-
-		}
-
-		models3 = projectManager.getProject().toModelElementArray(IModelElementFactory.MODEL_TYPE_TERM);
-
-		System.out.println("############## MODELS ...");
-
-		for (IModelElement elem : models3) {
-			IModel m = (IModel) elem;
-
-			for (IModelElement el : m.toChildArray()) {
-				System.out.println("MODEL ELEMENT: " + el.getName());
-			}
-
-		}
-
-		models3 = projectManager.getProject().toModelElementArray(IModelElementFactory.MODEL_TYPE_PACKAGE);
-
-		List<String> acc = new ArrayList<>();
-		for (IModelElement elem : models3) {
-			fetchAllClassesInProject(elem, acc);
-		}
-
-		for (String cl : acc) {
-			System.out.println("ACC CLASS: " + cl);
-		}
-
-		models3 = projectManager.getProject().toModelElementArray(IModelElementFactory.MODEL_TYPE_GLOSSARY);
-
-		for (IModelElement elem : models3) {
-			IGlossary g = (IGlossary) elem;
-
-			g.toTermArray();
 
 		}
 
 		models3 = projectManager.getProject()
-				.toModelElementArray(IModelElementFactory.MODEL_TYPE_MODEL_RELATIONSHIP_CONTAINER);
+				.toAllLevelModelElementArray(IModelElementFactory.MODEL_TYPE_GLOSSARY_TERM_ATTRIBUTE);
+
+		System.out.println("############## MODELS ...");
 
 		for (IModelElement elem : models3) {
+			IGlossaryTermAttribute m = (IGlossaryTermAttribute) elem;
 
-			IRelationshipEnd[] rend = elem.toToRelationshipEndArray();
-			System.out.println(rend[0].getName());
+			// for (IModelElement el : m.toChildArray()) {
+			// System.out.println("MODEL ELEMENT: " + el.getName());
+			// }
+
 		}
+
+		// models3 =
+		// projectManager.getProject().toModelElementArray(IModelElementFactory.MODEL_TYPE_BP_POOL);
+		//
+		// System.out.println("############## BP TASKS ...");
+		//
+		// for (IModelElement elem : models3) {
+		// IBPPool pool = (IBPPool) elem;
+		//
+		// IBPTask[] bptasks = pool.toBPTaskArray();
+		// for (IBPTask bptask : bptasks) {
+		// System.out.println(bptask.getName());
+		// }
+		// }
+		//
+		// models3 =
+		// projectManager.getProject().toModelElementArray(IModelElementFactory.MODEL_TYPE_CLASS);
+		//
+		// System.out.println("############## CLASSES ...");
+		//
+		// for (IModelElement elem : models3) {
+		// IClass c = (IClass) elem;
+		//
+		// for (IRelationshipEnd rend : c.toToRelationshipEndArray()) {
+		//
+		// IEndRelationship end = rend.getEndRelationship(); // relacja
+		// IRelationshipEnd oppend = rend.getOppositeEnd();
+		//
+		// IModelElement end1 = end.getTo(); // class1
+		// IModelElement end2 = end.getFrom();// class2
+		//
+		// String sss = rend.getName();
+		//
+		// System.out.println("here");
+		// }
+		//
+		// System.out.println("CLASS: " + c.getName());
+		//
+		// }
+		//
+		models3 = projectManager.getProject().toAllLevelModelElementArray(IModelElementFactory.MODEL_TYPE_MODEL);
+
+		System.out.println("############## MODELS ...");
+
+		for (IModelElement elem : models3) {
+			IModel m = (IModel) elem;
+
+			String kindOfModel = m.getName();
+
+			if (kindOfModel.equals("Business Rules")) {
+
+				IModelElement[] businessRules = m.toChildArray();
+				for (IModelElement br : businessRules) {
+					System.out.println("BR: " + br.getName());
+
+					IBusinessRule ibr = (IBusinessRule) br;
+
+					System.out.println(ibr.getRuleText());
+					ITerm[] brTerms = (ITerm[]) ibr.toTermArray();
+					IFact[] brFacts = (IFact[]) ibr.toFactArray();
+
+					if (brTerms != null) {
+						for (ITerm t : ibr.toTermArray()) {
+							System.out.println(br.getName() + " TERM: " + t.getName());
+						}
+					}
+
+					if (brFacts != null) {
+						for (IFact f : ibr.toFactArray()) {
+							System.out.println(br.getName() + " FACT: " + f.getName());
+
+							IFactRole[] factRoles = f.toFactRoleArray();
+							if (factRoles != null) {
+								for (IFactRole fr : factRoles) {
+									System.out.println(br.getName() + " FACT role: " + fr.getName());
+								}
+							}
+
+						}
+					}
+
+				}
+
+			}
+
+			if (kindOfModel.equals("Glossary")) {
+				IModelElement[] glossaryElements = m.toChildArray();
+				for (IModelElement g : glossaryElements) {
+					System.out.println("Gl elem: " + g.getName());
+				}
+			}
+
+			// System.out.println(m.getName());
+
+			// if (m.getName().equals("Business rules")) {
+			// for (IModelElement el : m.toChildArray()) {
+			// System.out.println("MODEL ELEMENT: " + el.getName());
+			// // if (el instanceof IBusinessRule) {
+			// // IBusinessRule br = (IBusinessRule) el;
+			// // String text = br.getRuleText();
+			// // System.out.println(" text - " + text);
+			// // for (IFact f : br.toFactArray()) {
+			// // System.out.println(" fact - " + f.getName());
+			// // }
+			// // for (ITerm t : br.toTermArray()) {
+			// // System.out.println(" term - " + t.getName());
+			// // }
+			// // }
+			// }
+			// }
+
+			// if (m.getName().equals("Business rules")) {
+			// for (IModelElement el : m.toChildArray()) {
+			// System.out.println("MODEL ELEMENT: " + el.getName());
+			// }
+			// }
+
+			// if (m.getName().equals("Glossary")) {
+			// for (IModelElement el : m.toChildArray()) {
+			// System.out.println("MODEL ELEMENT: " + el.getName());
+			// }
+			// }
+
+		}
+		//
+		// models3 =
+		// projectManager.getProject().toModelElementArray(IModelElementFactory.MODEL_TYPE_TERM);
+		//
+		// System.out.println("############## MODELS ...");
+		//
+		// for (IModelElement elem : models3) {
+		// IModel m = (IModel) elem;
+		//
+		// for (IModelElement el : m.toChildArray()) {
+		// System.out.println("MODEL ELEMENT: " + el.getName());
+		// }
+		//
+		// }
+		//
+		// models3 =
+		// projectManager.getProject().toModelElementArray(IModelElementFactory.MODEL_TYPE_PACKAGE);
+		//
+		// List<String> acc = new ArrayList<>();
+		// for (IModelElement elem : models3) {
+		// fetchAllClassesInProject(elem, acc);
+		// }
+		//
+		// for (String cl : acc) {
+		// System.out.println("ACC CLASS: " + cl);
+		// }
+		//
+		// models3 =
+		// projectManager.getProject().toModelElementArray(IModelElementFactory.MODEL_TYPE_GLOSSARY);
+		//
+		// for (IModelElement elem : models3) {
+		// IGlossary g = (IGlossary) elem;
+		//
+		// g.toTermArray();
+		//
+		// }
+		//
+		// models3 = projectManager.getProject()
+		// .toModelElementArray(IModelElementFactory.MODEL_TYPE_MODEL_RELATIONSHIP_CONTAINER);
+		//
+		// for (IModelElement elem : models3) {
+		//
+		// IRelationshipEnd[] rend = elem.toToRelationshipEndArray();
+		// System.out.println(rend[0].getName());
+		// }
 
 		// System.out.println("############## CLASSES ...");
 		//
