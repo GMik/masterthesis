@@ -2,16 +2,14 @@ package com.vp.plugin.connectors.businessrules;
 
 public class SBVRBusinessRulePart {
 
-	// one of these MUST be null
-	private SBVRFact fact;
-	private SBVRClassAttributeFact classAttributeFact;
+	// currently not supported
 	private boolean isNegated;
 
-	public SBVRBusinessRulePart() {
+	// one of these MUST be null
+	private SBVRFact fact;
+	private SBVRClassCharacteristicFact classAttributeFact;
 
-	}
-
-	public SBVRBusinessRulePart(SBVRFact fact, SBVRClassAttributeFact classAttributeFact) {
+	public SBVRBusinessRulePart(SBVRFact fact, SBVRClassCharacteristicFact classAttributeFact) {
 		this.fact = fact;
 		this.classAttributeFact = classAttributeFact;
 	}
@@ -24,11 +22,11 @@ public class SBVRBusinessRulePart {
 		this.fact = fact;
 	}
 
-	public SBVRClassAttributeFact getClassAttributeFact() {
+	public SBVRClassCharacteristicFact getClassAttributeFact() {
 		return classAttributeFact;
 	}
 
-	public void setClassAttributeFact(SBVRClassAttributeFact classAttributeFact) {
+	public void setClassAttributeFact(SBVRClassCharacteristicFact classAttributeFact) {
 		this.classAttributeFact = classAttributeFact;
 	}
 

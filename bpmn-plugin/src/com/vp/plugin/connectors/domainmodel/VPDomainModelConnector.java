@@ -13,15 +13,19 @@ import com.vp.plugin.ApplicationManager;
 import com.vp.plugin.ProjectManager;
 import com.vp.plugin.connectors.domainmodel.br.DomainModelSBVRRelevantElementsContainer;
 import com.vp.plugin.connectors.domainmodel.br.TermsAndClassFacts;
+import com.vp.plugin.connectors.domainmodel.br.facts.AggregationKind;
 import com.vp.plugin.connectors.domainmodel.br.facts.ClassFact;
 import com.vp.plugin.connectors.domainmodel.br.facts.Fact;
+import com.vp.plugin.connectors.domainmodel.br.facts.GeneralizationFact;
 import com.vp.plugin.connectors.domainmodel.br.facts.RelationshipFact;
 import com.vp.plugin.connectors.domainmodel.br.facts.RelationshipFact.RelationshipFactBuilder;
+import com.vp.plugin.connectors.domainmodel.br.facts.StateFact;
 import com.vp.plugin.connectors.domainmodel.br.terms.Term;
 import com.vp.plugin.model.IAssociation;
 import com.vp.plugin.model.IAssociationEnd;
 import com.vp.plugin.model.IAttribute;
 import com.vp.plugin.model.IClass;
+import com.vp.plugin.model.IGeneralization;
 import com.vp.plugin.model.IModelElement;
 import com.vp.plugin.model.IState2;
 import com.vp.plugin.model.factory.IModelElementFactory;
@@ -36,6 +40,18 @@ public class VPDomainModelConnector implements IVPDomainModelConnector {
 			stateMachines.add(new StateMachine(entry.getKey().getId(), entry.getKey(), entry.getValue()));
 		}
 		return stateMachines;
+	}
+
+	private List<StateFact> fetchStateFacts() {
+		List<StateFact> stateFacts = new ArrayList<>();
+		List<StateMachine> stateMachines = fetchStateMachines();
+		for (StateMachine sm : stateMachines) {
+			for (IState2 state : sm.getStates()) {
+				StateFact fact = new StateFact(new Term(sm.getForClass().getName()), state.getName());
+				stateFacts.add(fact);
+			}
+		}
+		return stateFacts;
 	}
 
 	@Override
@@ -79,11 +95,15 @@ public class VPDomainModelConnector implements IVPDomainModelConnector {
 		DomainModelSBVRRelevantElementsContainer container = new DomainModelSBVRRelevantElementsContainer();
 
 		List<RelationshipFact> relationshipFacts = fetchRelationshipFacts();
+		List<GeneralizationFact> generalizationFacts = fetchGeneralizationFacts();
 		TermsAndClassFacts termsAndClassFacts = fetchTermsAndClassFacts();
+		List<StateFact> stateFacts = fetchStateFacts();
 
 		container.setRelationshipFacts(relationshipFacts);
+		container.setGeneralizationFacts(generalizationFacts);
 		container.setTerms(termsAndClassFacts.terms);
 		container.setClassFacts(termsAndClassFacts.classFacts);
+		container.setStateFacts(stateFacts);
 
 		return container;
 	}
@@ -119,6 +139,39 @@ public class VPDomainModelConnector implements IVPDomainModelConnector {
 		return fetchTermsAndClassFacts().classFacts;
 	}
 
+	private List<GeneralizationFact> fetchGeneralizationFacts() {
+
+		IModelElement[] generalizations = ApplicationManager.instance().getProjectManager().getProject()
+				.toAllLevelModelElementArray(IModelElementFactory.MODEL_TYPE_GENERALIZATION);
+
+		List<GeneralizationFact> generalizationFacts = new ArrayList<>();
+
+		for (IModelElement elem : generalizations) {
+			IGeneralization generalization = (IGeneralization) elem;
+			IModelElement subclass = generalization.getTo(); // subclass
+			IModelElement superclass = generalization.getFrom(); // superclass
+			GeneralizationFact generalizationFact = new GeneralizationFact(new Term(superclass.getName()),
+					generalization.getName(), new Term(subclass.getName()));
+
+			generalizationFacts.add(generalizationFact);
+
+		}
+		return generalizationFacts;
+
+	}
+
+	private AggregationKind retrieveAggregationKind(String left, String right) {
+		if (left.equals(AggregationKind.COMPOSITION.getValue())
+				|| right.equals(AggregationKind.COMPOSITION.getValue())) {
+			return AggregationKind.COMPOSITION;
+		}
+		if (left.equals(AggregationKind.AGGREGATION.getValue())
+				|| right.equals(AggregationKind.AGGREGATION.getValue())) {
+			return AggregationKind.AGGREGATION;
+		}
+		return AggregationKind.ASSOCIATION;
+	}
+
 	private List<RelationshipFact> fetchRelationshipFacts() {
 
 		ProjectManager projectManager = ApplicationManager.instance().getProjectManager();
@@ -134,6 +187,13 @@ public class VPDomainModelConnector implements IVPDomainModelConnector {
 			IAssociationEnd associationEndFrom = (IAssociationEnd) association.getFromEnd();
 			IAssociationEnd associationEndTo = (IAssociationEnd) association.getToEnd();
 
+			//
+			String fromRole = associationEndFrom.getName();
+			String toRole = associationEndTo.getName();
+			//
+			AggregationKind aggregationKind = retrieveAggregationKind(associationEndFrom.getAggregationKind(),
+					associationEndTo.getAggregationKind());
+
 			String leftClass = associationEndFrom.getEndRelationship().getTo().getName();
 			String rightClass = associationEndFrom.getEndRelationship().getFrom().getName();
 
@@ -141,8 +201,9 @@ public class VPDomainModelConnector implements IVPDomainModelConnector {
 			String rightMultiplicity = associationEndTo.getMultiplicity();
 
 			RelationshipFact relationshipFact = new RelationshipFactBuilder().leftTerm(new Term(leftClass))
-					.leftMultiplicity(leftMultiplicity).verb(association.getName()).rightMultiplicity(rightMultiplicity)
-					.rightTerm(new Term(rightClass)).build();
+					.leftRole(fromRole).rightRole(toRole).leftMultiplicity(leftMultiplicity).verb(association.getName())
+					.rightMultiplicity(rightMultiplicity).rightTerm(new Term(rightClass))
+					.aggregationKind(aggregationKind).build();
 
 			relationshipFacts.add(relationshipFact);
 

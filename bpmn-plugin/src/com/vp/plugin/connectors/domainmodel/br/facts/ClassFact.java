@@ -29,4 +29,9 @@ public class ClassFact extends Fact {
 		this.property = property;
 	}
 
+	@Override
+	public String toString() {
+		return "class: " + term + ", attribute: " + property;
+	}
+
 }

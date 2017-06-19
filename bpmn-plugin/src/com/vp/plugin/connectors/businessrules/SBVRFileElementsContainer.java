@@ -7,13 +7,19 @@ import com.vp.plugin.utils.validation.ValidationResult;
 
 public class SBVRFileElementsContainer {
 
-	private List<SBVRClassAttributeTerm> attributeTerms = new ArrayList<>();
-	private List<SBVRClassAttributeFact> attributeFacts = new ArrayList<>();
+	private List<SBVRClassCharacteristicTerm> characteristicTerms = new ArrayList<>();
+	private List<SBVRClassCharacteristicFact> characteristicFacts = new ArrayList<>();
 
 	private List<SBVRTerm> terms = new ArrayList<>();
 	private List<SBVRFact> facts = new ArrayList<>();
 
+	private List<SBVRBusinessRule> businessRules = new ArrayList<>();
+
 	private List<ValidationResult> validationResults = new ArrayList<>();
+
+	public void add(SBVRBusinessRule businessRule) {
+		businessRules.add(businessRule);
+	}
 
 	public void add(ValidationResult validationResult) {
 		validationResults.add(validationResult);
@@ -27,28 +33,28 @@ public class SBVRFileElementsContainer {
 		facts.add(fact);
 	}
 
-	public void addAttributeTerm(SBVRClassAttributeTerm attributeTerm) {
-		attributeTerms.add(attributeTerm);
+	public void addAttributeTerm(SBVRClassCharacteristicTerm attributeTerm) {
+		characteristicTerms.add(attributeTerm);
 	}
 
-	public void addAttributeFact(SBVRClassAttributeFact attributeFact) {
-		attributeFacts.add(attributeFact);
+	public void addAttributeFact(SBVRClassCharacteristicFact attributeFact) {
+		characteristicFacts.add(attributeFact);
 	}
 
-	public List<SBVRClassAttributeTerm> getAttributeTerms() {
-		return attributeTerms;
+	public List<SBVRClassCharacteristicTerm> getCharacteristicTerms() {
+		return characteristicTerms;
 	}
 
-	public void setAttributeTerms(List<SBVRClassAttributeTerm> attributeTerms) {
-		this.attributeTerms = attributeTerms;
+	public void setCharacteristicTerms(List<SBVRClassCharacteristicTerm> characteristicTerms) {
+		this.characteristicTerms = characteristicTerms;
 	}
 
-	public List<SBVRClassAttributeFact> getAttributeFacts() {
-		return attributeFacts;
+	public List<SBVRClassCharacteristicFact> getCharacteristicFacts() {
+		return characteristicFacts;
 	}
 
-	public void setAttributeFacts(List<SBVRClassAttributeFact> attributeFacts) {
-		this.attributeFacts = attributeFacts;
+	public void setCharacteristicFacts(List<SBVRClassCharacteristicFact> characteristicFacts) {
+		this.characteristicFacts = characteristicFacts;
 	}
 
 	public List<SBVRTerm> getTerms() {
@@ -73,6 +79,14 @@ public class SBVRFileElementsContainer {
 
 	public void setValidationResults(List<ValidationResult> validationResults) {
 		this.validationResults = validationResults;
+	}
+
+	public List<SBVRBusinessRule> getBusinessRules() {
+		return businessRules;
+	}
+
+	public void setBusinessRules(List<SBVRBusinessRule> businessRules) {
+		this.businessRules = businessRules;
 	}
 
 }

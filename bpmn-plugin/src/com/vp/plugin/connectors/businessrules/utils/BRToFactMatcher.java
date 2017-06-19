@@ -3,7 +3,6 @@ package com.vp.plugin.connectors.businessrules.utils;
 import java.util.Objects;
 
 import com.vp.plugin.connectors.businessrules.SBVRBusinessRule;
-import com.vp.plugin.connectors.businessrules.SBVRBusinessRulePart;
 import com.vp.plugin.connectors.businessrules.SBVRFileElementsContainer;
 
 public class BRToFactMatcher {
@@ -25,9 +24,9 @@ public class BRToFactMatcher {
 
 		if (sbvrBusinessRule.getText().contains(SBVRLogicalOperations.AND.getValue())) {
 			String[] parts = sbvrBusinessRule.getText().split(SBVRLogicalOperations.AND.getValue());
-			SBVRBusinessRulePart firstPart = new SBVRBusinessRulePart();
-
-			SBVRBusinessRulePart secondPart = new SBVRBusinessRulePart();
+			// SBVRBusinessRulePart firstPart = new SBVRBusinessRulePart();
+			//
+			// SBVRBusinessRulePart secondPart = new SBVRBusinessRulePart();
 
 		}
 

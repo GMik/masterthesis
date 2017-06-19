@@ -1,31 +1,45 @@
 package com.vp.plugin.testingfeatures;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.vp.plugin.ApplicationManager;
 import com.vp.plugin.ViewManager;
+import com.vp.plugin.connectors.businessrules.SBVRFileConnector;
+import com.vp.plugin.connectors.businessrules.SBVRFileElementsContainer;
+import com.vp.plugin.connectors.domainmodel.VPDomainModelConnector;
+import com.vp.plugin.connectors.domainmodel.br.DomainModelSBVRRelevantElementsContainer;
 import com.vp.plugin.diagram.IBusinessProcessDiagramUIModel;
+import com.vp.plugin.diagram.IClassDiagramUIModel;
 import com.vp.plugin.diagram.IDiagramElement;
 import com.vp.plugin.diagram.IDiagramListener;
 import com.vp.plugin.diagram.IDiagramUIModel;
 import com.vp.plugin.diagram.IStateDiagramUIModel;
-import com.vp.plugin.exceptions.ValidationException;
+import com.vp.plugin.model.IAssociation;
+import com.vp.plugin.model.IAssociationEnd;
 import com.vp.plugin.model.IBPDataObject;
 import com.vp.plugin.model.IBPEndEvent;
 import com.vp.plugin.model.IBPIntermediateEvent;
 import com.vp.plugin.model.IBPStartEvent;
+import com.vp.plugin.model.IClass;
+import com.vp.plugin.model.IGeneralization;
 import com.vp.plugin.model.IModelElement;
 import com.vp.plugin.utils.validation.ValidationResult;
 import com.vp.plugin.utils.validation.bp.dataobjects.BPDataObjectValidator;
 import com.vp.plugin.utils.validation.bp.dataobjects.BPObjectStandardValidationStrategy;
 import com.vp.plugin.utils.validation.bp.events.BPEventRestrictiveValidationStrategy;
 import com.vp.plugin.utils.validation.bp.events.BPEventValidator;
+import com.vp.plugin.utils.validation.sbvr.to.dm.SBVRToDomainModelValidator;
 
 public class DiagramListener implements IDiagramListener {
-
-	ViewManager _viewManager = ApplicationManager.instance().getViewManager();
 
 	private static BPEventValidator eventValidator;
 
 	private static BPDataObjectValidator bpObjectValidator;
+
+	ViewManager _viewManager = ApplicationManager.instance().getViewManager();
 
 	public DiagramListener() {
 	}
@@ -36,23 +50,144 @@ public class DiagramListener implements IDiagramListener {
 	}
 
 	@Override
+	public void diagramUIModelRenamed(IDiagramUIModel arg0) {
+
+		System.out.println();
+		// do nothing
+	}
+
+	@Override
 	public void diagramElementAdded(IDiagramUIModel arg0, IDiagramElement arg1) {
-		System.out.println("===> DiagramListener.diagramElementAdded(...)");
-		_viewManager.showMessage("Diagram Element " + arg1.getModelElement().getName() + " Added");
+
+		System.out.println();
+		// do nothing
 	}
 
 	@Override
 	public void diagramElementRemoved(IDiagramUIModel arg0, IDiagramElement arg1) {
-		System.out.println("===> DiagramListener.diagramElementRemoved(...)");
-		_viewManager.showMessage("Diagram Element " + arg1.getModelElement().getName() + " Removed");
+
+		System.out.println();
+		// do nothing
 
 	}
 
 	@Override
 	public void diagramUIModelLoaded(IDiagramUIModel arg0) {
-		System.out.println("===> DiagramListener.diagramUIModelLoaded(...)");
-		_viewManager.showMessage("Diagram " + arg0.getType() + " : " + arg0.getName() + " Loaded");
 
+		System.out.println();
+		// do nothing
+
+	}
+
+	@Override
+	public void diagramUIModelPropertyChanged(IDiagramUIModel diagramUIModel, String arg1, Object arg2, Object arg3) {
+
+		IModelElement selectedElement = retrieveSelectedElement() == null ? null
+				: retrieveSelectedElement().getMetaModelElement();
+		if (selectedElement == null) {
+			return;
+		}
+
+		if (isClassDiagramUIModel(diagramUIModel)) {
+			SBVRToDomainModelValidator validator = initializeBVRToDomainModelValidator();
+			validateClassDiagramElements(selectedElement, validator);
+		}
+
+		if (isBusinessProcessDiagramUIModel(diagramUIModel)) {
+			validateBPMNElements(selectedElement);
+		}
+
+		if (isStateDiagramUIModel(diagramUIModel)) {
+			SBVRToDomainModelValidator validator = initializeBVRToDomainModelValidator();
+			validateStateMachineElements(selectedElement, validator);
+		}
+
+	}
+
+	private void validateClassDiagramElements(IModelElement selectedElement, SBVRToDomainModelValidator validator) {
+
+		List<ValidationResult> validationResults = new ArrayList<>();
+
+		validationResults.addAll(validator.validateClassAttributes());
+		if (isClass(selectedElement)) {
+			validationResults.addAll(validator.validateAssociations());
+			validationResults.addAll(validator.validateCompositions());
+			validationResults.addAll(validator.validateGeneralizations());
+		}
+
+		if (isAssociation(selectedElement) || isAssociationEnd(selectedElement)
+				|| isAssociation(selectedElement.getParent())) {
+			validationResults.addAll(validator.validateAssociations());
+			validationResults.addAll(validator.validateCompositions());
+		}
+
+		if (isGeneralization(selectedElement)) {
+			validationResults.addAll(validator.validateGeneralizations());
+		}
+
+		List<ValidationResult> validationResultForSelectedElement = validationResults.stream()
+				.filter(result -> result.getMessage().contains(selectedElement.getName())).collect(Collectors.toList());
+
+		for (ValidationResult result : validationResultForSelectedElement) {
+			_viewManager.showMessage(result.getMessage());
+		}
+	}
+
+	private void validateBPMNElements(IModelElement selectedElement) {
+		ValidationResult validationResult = null;
+
+		validationResult = instanceOfBPEvent(selectedElement) ? validateEvent(selectedElement) : validationResult;
+		validationResult = instanceOfBPObject(selectedElement) ? validateBPObject(selectedElement) : validationResult;
+
+		if (validationResult != null) {
+			_viewManager.showMessage(validationResult.getMessage());
+		}
+	}
+
+	private void validateStateMachineElements(IModelElement selectedElement, SBVRToDomainModelValidator validator) {
+
+		List<ValidationResult> validationResults = validator.validateClassStates();
+
+		List<ValidationResult> validationResultForSelectedElement = validationResults.stream()
+				.filter(result -> result.getMessage().contains(selectedElement.getName())).collect(Collectors.toList());
+
+		for (ValidationResult result : validationResultForSelectedElement) {
+			_viewManager.showMessage(result.getMessage());
+		}
+	}
+
+	private ValidationResult validateEvent(IModelElement selectedElement) {
+
+		ValidationResult validationResult = null;
+
+		if (selectedElement instanceof IBPStartEvent) {
+			validationResult = eventValidator.validate((IBPStartEvent) selectedElement);
+		} else if (selectedElement instanceof IBPIntermediateEvent) {
+			validationResult = eventValidator.validate((IBPIntermediateEvent) selectedElement);
+
+		} else if (selectedElement instanceof IBPEndEvent) {
+			validationResult = eventValidator.validate((IBPEndEvent) selectedElement);
+		}
+		return validationResult;
+	}
+
+	private SBVRToDomainModelValidator initializeBVRToDomainModelValidator() {
+		VPDomainModelConnector connector = new VPDomainModelConnector();
+		SBVRFileConnector sbvrConnector = new SBVRFileConnector();
+
+		DomainModelSBVRRelevantElementsContainer dmContainer = connector.fetchSBVRRelevantElements();
+		SBVRFileElementsContainer sbvrContainer = null;
+		try {
+			sbvrContainer = sbvrConnector.loadSBVRData();
+		} catch (IOException e) {
+
+		}
+
+		return new SBVRToDomainModelValidator(dmContainer, sbvrContainer);
+	}
+
+	private ValidationResult validateBPObject(IModelElement selectedElement) {
+		return bpObjectValidator.validate(selectedElement);
 	}
 
 	private IDiagramElement retrieveSelectedElement() {
@@ -63,60 +198,20 @@ public class DiagramListener implements IDiagramListener {
 		}
 	}
 
-	private ValidationResult eventValidation(IModelElement selectedElement) {
+	private boolean isGeneralization(IModelElement selectedElement) {
+		return selectedElement instanceof IGeneralization;
+	}
 
-		ValidationResult validationResult = null;
+	private boolean isAssociation(IModelElement selectedElement) {
+		return selectedElement instanceof IAssociation;
+	}
 
-		// if (selectedElement instanceof IBPTask) {
-		// IVPDomainModelConnector domainModelConnector = new
-		// VPDomainModelConnector();
-		// String[] taskWords = ModelElementUtil.fetchWords(selectedElement);
-		// if (taskWords != null) {
-		// for (String tw : taskWords) {
-		// System.out.println(tw);
-		// }
-		// }
-		if (selectedElement instanceof IBPStartEvent)
+	private boolean isAssociationEnd(IModelElement selectedElement) {
+		return selectedElement instanceof IAssociationEnd;
+	}
 
-		{
-
-			/**
-			 * TODO - REFACTOR!
-			 */
-
-			try {
-				validationResult = eventValidator.validate((IBPStartEvent) selectedElement);
-			} catch (ValidationException e) {
-
-				System.out.println("########### validation exception - IBPStartEvent");
-				/**
-				 * TODO
-				 */
-			}
-
-		} else if (selectedElement instanceof IBPIntermediateEvent) {
-
-			try {
-				validationResult = eventValidator.validate((IBPIntermediateEvent) selectedElement);
-			} catch (ValidationException e) {
-
-				System.out.println("########### validation exception - IBPIntermediateEvent");
-				/**
-				 * TODO
-				 */
-			}
-
-		} else if (selectedElement instanceof IBPEndEvent) {
-
-			try {
-				validationResult = eventValidator.validate((IBPEndEvent) selectedElement);
-			} catch (ValidationException e) {
-				System.out.println("########### validation exception - IBPEndEvent");/**
-																						 * TODO
-																						 */
-			}
-		}
-		return validationResult;
+	private boolean isClass(IModelElement selectedElement) {
+		return selectedElement instanceof IClass;
 	}
 
 	private boolean instanceOfBPEvent(IModelElement selectedElement) {
@@ -128,58 +223,12 @@ public class DiagramListener implements IDiagramListener {
 		return selectedElement instanceof IBPDataObject;
 	}
 
-	// TODO- chain of responsibility?
-	@Override
-	public void diagramUIModelPropertyChanged(IDiagramUIModel diagramUIModel, String arg1, Object arg2, Object arg3) {
-
-		System.out.println("===> DiagramListener.diagramUIModelPropertyChanged(...)");
-
-		IModelElement selectedElement = retrieveSelectedElement() == null ? null
-				: retrieveSelectedElement().getMetaModelElement();
-		ValidationResult validationResult = null;
-
-		if (selectedElement == null) {
-			return;
-		}
-
-		if (isBusinessProcessDiagramUIModel(diagramUIModel)) {
-
-			validationResult = instanceOfBPEvent(selectedElement) ? eventValidation(selectedElement) : validationResult;
-			validationResult = instanceOfBPObject(selectedElement) ? bpObjectValidation(selectedElement)
-					: validationResult;
-
-		} else if (isStateDiagramUIModel(diagramUIModel)) {
-
-		}
-
-		if (validationResult != null) {
-			System.out.println("--------- VALIDATION MESSAGE: " + validationResult.getMessage());
-			_viewManager.showMessage(validationResult.getMessage());
-		}
-
-	}
-
-	private ValidationResult bpObjectValidation(IModelElement selectedElement) {
-		try {
-			return bpObjectValidator.validate(selectedElement);
-		} catch (ValidationException e) {
-			System.out.println("########### validation exception - IBPDataObject");
-			/**
-			 * TODO
-			 */
-			return null;
-		}
-	}
-
-	@Override
-	public void diagramUIModelRenamed(IDiagramUIModel arg0) {
-		System.out.println("===> DiagramListener.diagramUIModelRenamed(...)");
-		System.out.println("Diagram " + arg0.getType() + " : " + arg0.getName() + " Renamed");
-
-	}
-
 	private boolean isBusinessProcessDiagramUIModel(IDiagramUIModel diagramUIModel) {
 		return (diagramUIModel != null && diagramUIModel instanceof IBusinessProcessDiagramUIModel);
+	}
+
+	private boolean isClassDiagramUIModel(IDiagramUIModel diagramUIModel) {
+		return (diagramUIModel != null && diagramUIModel instanceof IClassDiagramUIModel);
 	}
 
 	private boolean isStateDiagramUIModel(IDiagramUIModel diagramUIModel) {

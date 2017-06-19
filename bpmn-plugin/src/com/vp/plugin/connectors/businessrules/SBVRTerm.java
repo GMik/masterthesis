@@ -9,6 +9,11 @@ public class SBVRTerm {
 	}
 
 	@Override
+	public String toString() {
+		return term;
+	}
+
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;

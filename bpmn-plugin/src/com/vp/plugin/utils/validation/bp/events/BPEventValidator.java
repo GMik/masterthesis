@@ -1,7 +1,6 @@
 package com.vp.plugin.utils.validation.bp.events;
 
 import com.vp.plugin.diagram.IDiagramElement;
-import com.vp.plugin.exceptions.ValidationException;
 import com.vp.plugin.model.IBPEndEvent;
 import com.vp.plugin.model.IBPIntermediateEvent;
 import com.vp.plugin.model.IBPStartEvent;
@@ -16,15 +15,15 @@ public class BPEventValidator {
 		this.validationStrategy = validationStrategy;
 	}
 
-	public ValidationResult validate(IBPStartEvent startEvent) throws ValidationException {
+	public ValidationResult validate(IBPStartEvent startEvent) {
 		return validateX(startEvent);
 	}
 
-	public ValidationResult validate(IBPIntermediateEvent intermediateEvent) throws ValidationException {
+	public ValidationResult validate(IBPIntermediateEvent intermediateEvent) {
 		return validateX(intermediateEvent);
 	}
 
-	public ValidationResult validate(IBPEndEvent endEvent) throws ValidationException {
+	public ValidationResult validate(IBPEndEvent endEvent) {
 		return validateX(endEvent);
 	}
 
@@ -36,7 +35,7 @@ public class BPEventValidator {
 		this.validationStrategy = validationStrategy;
 	}
 
-	private ValidationResult validateX(IModelElement modelElement) throws ValidationException {
+	private ValidationResult validateX(IModelElement modelElement) {
 		return validationStrategy.validate(modelElement);
 	}
 

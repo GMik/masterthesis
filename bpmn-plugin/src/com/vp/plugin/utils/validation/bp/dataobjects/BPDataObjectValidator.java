@@ -1,6 +1,5 @@
 package com.vp.plugin.utils.validation.bp.dataobjects;
 
-import com.vp.plugin.exceptions.ValidationException;
 import com.vp.plugin.model.IModelElement;
 import com.vp.plugin.utils.validation.ValidationResult;
 
@@ -19,7 +18,7 @@ public class BPDataObjectValidator {
 		this.validationStrategy = validationStrategy;
 	}
 
-	public ValidationResult validate(IModelElement modelElement) throws ValidationException {
+	public ValidationResult validate(IModelElement modelElement) {
 		return validationStrategy.validate(modelElement);
 	}
 

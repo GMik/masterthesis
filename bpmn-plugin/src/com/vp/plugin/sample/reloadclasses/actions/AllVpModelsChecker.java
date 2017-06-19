@@ -1,9 +1,17 @@
 package com.vp.plugin.sample.reloadclasses.actions;
 
+import java.io.IOException;
 import java.util.List;
 
 import com.vp.plugin.ApplicationManager;
 import com.vp.plugin.ProjectManager;
+import com.vp.plugin.connectors.businessrules.CharacteristicKindOf;
+import com.vp.plugin.connectors.businessrules.SBVRClassCharacteristicFact;
+import com.vp.plugin.connectors.businessrules.SBVRClassCharacteristicTerm;
+import com.vp.plugin.connectors.businessrules.SBVRFact;
+import com.vp.plugin.connectors.businessrules.SBVRFileConnector;
+import com.vp.plugin.connectors.businessrules.SBVRFileElementsContainer;
+import com.vp.plugin.connectors.businessrules.SBVRTerm;
 import com.vp.plugin.connectors.domainmodel.VPDomainModelConnector;
 import com.vp.plugin.connectors.domainmodel.br.DomainModelSBVRRelevantElementsContainer;
 import com.vp.plugin.model.IBRKeyword;
@@ -17,14 +25,28 @@ import com.vp.plugin.model.IModel;
 import com.vp.plugin.model.IModelElement;
 import com.vp.plugin.model.ITerm;
 import com.vp.plugin.model.factory.IModelElementFactory;
+import com.vp.plugin.utils.validation.sbvr.to.dm.SBVRToDomainModelValidator;
 
 public class AllVpModelsChecker {
 
 	public static void checkSelected() {
 
 		VPDomainModelConnector connector = new VPDomainModelConnector();
+		SBVRFileConnector sbvrConnector = new SBVRFileConnector();
 
-		DomainModelSBVRRelevantElementsContainer container = connector.fetchSBVRRelevantElements();
+		DomainModelSBVRRelevantElementsContainer dmContainer = connector.fetchSBVRRelevantElements();
+		SBVRFileElementsContainer sbvrContainer = null;
+		try {
+			sbvrContainer = sbvrConnector.loadSBVRData();
+		} catch (IOException e) {
+
+		}
+
+		SBVRToDomainModelValidator validator = new SBVRToDomainModelValidator(dmContainer, sbvrContainer);
+		validator.validateAssociations();
+		validator.validateCompositions();
+		validator.validateGeneralizations();
+
 		// List<Relationship> r = connector.fetchRelationships();
 		// List<Term> t = connector.fetchTerms();
 		// TermsAndClassFacts tasf = connector.fetchTermsAndSimpleFacts();
@@ -262,6 +284,58 @@ public class AllVpModelsChecker {
 
 	public static void checkAllModels() {
 
+		SBVRFileConnector sbvrFileConnector = new SBVRFileConnector();
+		SBVRFileElementsContainer container = null;
+
+		try {
+			container = sbvrFileConnector.loadSBVRData();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		for (SBVRTerm t : container.getTerms()) {
+			System.out.println("TERM: " + t.getTerm());
+		}
+
+		for (SBVRClassCharacteristicTerm t : container.getCharacteristicTerms()) {
+
+			if (CharacteristicKindOf.ATTRIBUTE.getValue().equals(t.getCharacteristicKindOf().getValue())) {
+				System.out.println("ATT TERM: " + t.getTerm().getTerm() + " - " + t.getCharacteristicTerm());
+			}
+
+		}
+
+		for (SBVRClassCharacteristicTerm t : container.getCharacteristicTerms()) {
+			if (CharacteristicKindOf.STATE.getValue().equals(t.getCharacteristicKindOf().getValue())) {
+				System.out.println("STATE TERM: " + t.getTerm().getTerm() + " - " + t.getCharacteristicTerm());
+			}
+		}
+
+		for (SBVRFact x : container.getFacts()) {
+			System.out.println(
+					"FACT: " + x.getTerm1().getTerm() + " - " + x.getRelationship() + " - " + x.getTerm2().getTerm());
+		}
+
+		for (SBVRClassCharacteristicFact t : container.getCharacteristicFacts()) {
+
+			if (CharacteristicKindOf.ATTRIBUTE.getValue().equals(t.getCharacteristicKinfOf().getValue())) {
+				System.out.println("ATT FACT: " + t.getClassCharacteristicTerm().getTerm().getTerm() + " - "
+						+ t.getAttributeRelationship().getValue() + " - "
+						+ t.getClassCharacteristicTerm().getCharacteristicTerm());
+			}
+
+		}
+
+		for (SBVRClassCharacteristicFact t : container.getCharacteristicFacts()) {
+			if (CharacteristicKindOf.STATE.getValue().equals(t.getCharacteristicKinfOf().getValue())) {
+				System.out.println("STATE FACT: " + t.getClassCharacteristicTerm().getTerm().getTerm() + " - "
+						+ t.getStateRelationship().getValue() + " - "
+						+ t.getClassCharacteristicTerm().getCharacteristicTerm());
+			}
+		}
+
+		System.out.println();
 		checkSelected();
 
 		ProjectManager projectManager = ApplicationManager.instance().getProjectManager();

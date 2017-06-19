@@ -5,7 +5,14 @@ import java.util.List;
 public class SBVRBusinessRule {
 
 	private String text;
+	// currently only for one, because of that list always has size 1
 	private List<SBVRBusinessRulePart> businessRuleParts;
+
+	// public SBVRBusinessRule(String text, List<SBVRBusinessRulePart>
+	// businessRuleParts) {
+	// this.text = text;
+	// this.businessRuleParts = businessRuleParts;
+	// }
 
 	public SBVRBusinessRule(String text, List<SBVRBusinessRulePart> businessRuleParts) {
 		this.text = text;

@@ -9,19 +9,26 @@ import com.vp.plugin.connectors.domainmodel.br.terms.Term;
  */
 public class RelationshipFact extends Fact {
 
+	private AggregationKind aggregationKind;
+
 	private Term leftTerm;
+	private String leftTermRole;
 	private String leftMultiplicity;
 	private String verb;
 	private String rightMultiplicity;
 	private Term rightTerm;
+	private String rightTermRole;
 
-	private RelationshipFact(Term leftTerm, String leftMultiplicity, String verb, String rightMultiplicity,
-			Term rightTerm) {
+	public RelationshipFact(AggregationKind aggregationKind, Term leftTerm, String leftTermRole,
+			String leftMultiplicity, String verb, String rightMultiplicity, Term rightTerm, String rightTermRole) {
+		this.aggregationKind = aggregationKind;
 		this.leftTerm = leftTerm;
+		this.leftTermRole = leftTermRole;
 		this.leftMultiplicity = leftMultiplicity;
 		this.verb = verb;
 		this.rightMultiplicity = rightMultiplicity;
 		this.rightTerm = rightTerm;
+		this.rightTermRole = rightTermRole;
 	}
 
 	public Term getLeftTerm() {
@@ -64,12 +71,45 @@ public class RelationshipFact extends Fact {
 		this.rightTerm = rightTerm;
 	}
 
+	public void setAggregationKind(AggregationKind aggregationKind) {
+		this.aggregationKind = aggregationKind;
+	}
+
+	public AggregationKind getAggregationKind() {
+		return aggregationKind;
+	}
+
+	public String getLeftTermRole() {
+		return leftTermRole;
+	}
+
+	public void setLeftTermRole(String leftTermRole) {
+		this.leftTermRole = leftTermRole;
+	}
+
+	public String getRightTermRole() {
+		return rightTermRole;
+	}
+
+	public void setRightTermRole(String rightTermRole) {
+		this.rightTermRole = rightTermRole;
+	}
+
+	@Override
+	public String toString() {
+		return aggregationKind + " - " + verb + "(" + this.leftTerm + "(role: " + leftTermRole + ")" + ","
+				+ this.rightTerm + "(role: " + rightTermRole + "))";
+	}
+
 	public static class RelationshipFactBuilder {
 		private Term leftTerm;
+		private String leftRole;
 		private String leftMultiplicity;
 		private String verb;
 		private String rightMultiplicity;
 		private Term rightTerm;
+		private String rightRole;
+		private AggregationKind aggregationKind;
 
 		public RelationshipFactBuilder leftTerm(Term term) {
 			this.leftTerm = term;
@@ -96,8 +136,24 @@ public class RelationshipFact extends Fact {
 			return this;
 		}
 
+		public RelationshipFactBuilder aggregationKind(AggregationKind aggregationKind) {
+			this.aggregationKind = aggregationKind;
+			return this;
+		}
+
+		public RelationshipFactBuilder leftRole(String leftRole) {
+			this.leftRole = leftRole;
+			return this;
+		}
+
+		public RelationshipFactBuilder rightRole(String rightRole) {
+			this.rightRole = rightRole;
+			return this;
+		}
+
 		public RelationshipFact build() {
-			return new RelationshipFact(leftTerm, leftMultiplicity, verb, rightMultiplicity, rightTerm);
+			return new RelationshipFact(aggregationKind, leftTerm, leftRole, leftMultiplicity, verb, rightMultiplicity,
+					rightTerm, rightRole);
 		}
 
 	}

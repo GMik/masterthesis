@@ -1,0 +1,52 @@
+Term:User
+Term:Task
+Term:TaskStatus
+Term:Administrator
+Term:StoryOwner
+Term:Story
+
+ClassAttributeTerm:User;firstname
+ClassAttributeTerm:User;lastname
+ClassAttributeTerm:User;login
+ClassAttributeTerm:Task;created
+ClassAttributeTerm:Task;name
+
+ClassStateTerm:TaskStatus;to do
+ClassStateTerm:TaskStatus;in progress
+ClassStateTerm:TaskStatus;in review
+ClassStateTerm:TaskStatus;done
+
+Fact:User as assignee;assign to;Task as userTask
+Fact:Task;possess;TaskStatus
+Fact:Administrator;extends;User
+Fact:User;is extended by;StoryOwner
+Fact:Task;is owned by;Story
+Fact:Story;cancels;Task
+Fact:StoryOwner;owns;Story
+
+ClassCharacteristicFact:User;has;firstname
+ClassCharacteristicFact:User;has;lastname
+ClassCharacteristicFact:login;is property of;User
+ClassCharacteristicFact:created;is property of;Task
+ClassCharacteristicFact:Task;has;name
+ClassCharacteristicFact:TaskStatus;has state;to do
+ClassCharacteristicFact:in progress;is state of;TaskStatus
+ClassCharacteristicFact:TaskStatus;has state;in review
+ClassCharacteristicFact:TaskStatus;has state;done
+
+BusinessRule:User as assignee assign to Task as userTask
+BusinessRule:Task possess TaskStatus
+BusinessRule:Administrator extends User
+BusinessRule:User is extended by StoryOwner
+BusinessRule:Task is owned by Story
+BusinessRule:StoryOwner owns Story
+
+BusinessRule:User has firstname
+BusinessRule:User has lastname
+BusinessRule:login is property of User
+BusinessRule:created is property of Task
+BusinessRule:Task has name
+BusinessRule:TaskStatus has state to do
+BusinessRule:in progress is state of TaskStatus
+BusinessRule:TaskStatus has state in review
+BusinessRule:TaskStatus has state done

@@ -10,7 +10,9 @@ public class SBVRFileConstants {
 	public static final String TYPE_TERM = "Term";
 	public static final String TYPE_FACT = "Fact";
 	public static final String TYPE_CLASS_ATTRIBUTE_TERM = "ClassAttributeTerm";
-	public static final String TYPE_CLASS_ATTRIBUTE_FACT = "ClassAttributeFact";
+	public static final String TYPE_CLASS_STATE_TERM = "ClassStateTerm";
+
+	public static final String TYPE_CLASS_CHARACTERISTIC_FACT = "ClassCharacteristicFact";
 	public static final String TYPE_BUSINESS_RULE = "BusinessRule";
 
 	// public static final String CLASS_HAS_ATTRIBUTE_RELATION = "has";
