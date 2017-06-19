@@ -14,13 +14,23 @@ public class SBVRBusinessRule {
 	// this.businessRuleParts = businessRuleParts;
 	// }
 
-	public SBVRBusinessRule(String text, List<SBVRBusinessRulePart> businessRuleParts) {
-		this.text = text;
-		this.businessRuleParts = businessRuleParts;
-	}
+	private String id;
+
+	// public SBVRBusinessRule(String text, List<SBVRBusinessRulePart>
+	// businessRuleParts) {
+	// this.text = text;
+	// this.businessRuleParts = businessRuleParts;
+	// }
 
 	public String getText() {
 		return text;
+	}
+
+	public SBVRBusinessRule(String text, List<SBVRBusinessRulePart> businessRuleParts, String id) {
+		super();
+		this.text = text;
+		this.businessRuleParts = businessRuleParts;
+		this.id = id;
 	}
 
 	public void setText(String text) {
@@ -33,6 +43,14 @@ public class SBVRBusinessRule {
 
 	public void setBusinessRuleParts(List<SBVRBusinessRulePart> businessRuleParts) {
 		this.businessRuleParts = businessRuleParts;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 
 }

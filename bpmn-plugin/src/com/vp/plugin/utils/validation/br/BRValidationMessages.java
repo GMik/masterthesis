@@ -12,4 +12,5 @@ public class BRValidationMessages {
 
 	public static final String ATTRIBUTE_FACT_INCORRECT = "Fact of terms: {0} {1} and relationship {2} is not correctly created.";
 
+	public static final String BR_WITH_GIVEN_ID_DOES_NOT_EXIST = "Business rule  with given id: {0} does not exist in SBVR data file";
 }

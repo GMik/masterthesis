@@ -34,19 +34,19 @@ ClassCharacteristicFact:in progress;is state of;TaskStatus
 ClassCharacteristicFact:TaskStatus;has state;in review
 ClassCharacteristicFact:TaskStatus;has state;done
 
-BusinessRule:User as assignee assign to Task as userTask
-BusinessRule:Task possess TaskStatus
-BusinessRule:Administrator extends User
-BusinessRule:User is extended by StoryOwner
-BusinessRule:Task is owned by Story
-BusinessRule:StoryOwner owns Story
+BusinessRule:BR001;User as assignee assign to Task as userTask
+BusinessRule:BR002;Task possess TaskStatus
+BusinessRule:BR003;Administrator extends User
+BusinessRule:BR004;User is extended by StoryOwner
+BusinessRule:BR005;Task is owned by Story
+BusinessRule:BR006;StoryOwner owns Story
 
-BusinessRule:User has firstname
-BusinessRule:User has lastname
-BusinessRule:login is property of User
-BusinessRule:created is property of Task
-BusinessRule:Task has name
-BusinessRule:TaskStatus has state to do
-BusinessRule:in progress is state of TaskStatus
-BusinessRule:TaskStatus has state in review
-BusinessRule:TaskStatus has state done
+BusinessRule:BR007;User has firstname
+BusinessRule:BR008;User has lastname
+BusinessRule:BR009;login is property of User
+BusinessRule:BR010;created is property of Task
+BusinessRule:BR011;Task has name
+BusinessRule:BR012;TaskStatus has state to do
+BusinessRule:BR013;in progress is state of TaskStatus
+BusinessRule:BR014;TaskStatus has state in review
+BusinessRule:BR015;TaskStatus has state done

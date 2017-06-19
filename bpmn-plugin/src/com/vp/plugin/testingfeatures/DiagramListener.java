@@ -23,14 +23,20 @@ import com.vp.plugin.model.IBPDataObject;
 import com.vp.plugin.model.IBPEndEvent;
 import com.vp.plugin.model.IBPIntermediateEvent;
 import com.vp.plugin.model.IBPStartEvent;
+import com.vp.plugin.model.IBusinessRule;
+import com.vp.plugin.model.IBusinessRuleAssociation;
+import com.vp.plugin.model.IBusinessRuleGroup;
 import com.vp.plugin.model.IClass;
 import com.vp.plugin.model.IGeneralization;
+import com.vp.plugin.model.IModel;
 import com.vp.plugin.model.IModelElement;
+import com.vp.plugin.model.factory.IModelElementFactory;
 import com.vp.plugin.utils.validation.ValidationResult;
 import com.vp.plugin.utils.validation.bp.dataobjects.BPDataObjectValidator;
 import com.vp.plugin.utils.validation.bp.dataobjects.BPObjectStandardValidationStrategy;
 import com.vp.plugin.utils.validation.bp.events.BPEventRestrictiveValidationStrategy;
 import com.vp.plugin.utils.validation.bp.events.BPEventValidator;
+import com.vp.plugin.utils.validation.sbvr.to.dm.SBVRToBusinessRulesValidator;
 import com.vp.plugin.utils.validation.sbvr.to.dm.SBVRToDomainModelValidator;
 
 public class DiagramListener implements IDiagramListener {
@@ -79,6 +85,27 @@ public class DiagramListener implements IDiagramListener {
 
 	}
 
+	private void clearBusinessRules() {
+
+		IModelElement[] models = ApplicationManager.instance().getProjectManager().getProject()
+				.toAllLevelModelElementArray(IModelElementFactory.MODEL_TYPE_MODEL);
+
+		for (IModelElement elem : models) {
+			IModel m = (IModel) elem;
+
+			String kindOfModel = m.getName();
+
+			if (kindOfModel.equals("Business Rules")) {
+				IModelElement[] businessRules = m.toChildArray();
+
+				for (IModelElement br : businessRules) {
+					m.removeChild(br);
+				}
+			}
+		}
+
+	}
+
 	@Override
 	public void diagramUIModelPropertyChanged(IDiagramUIModel diagramUIModel, String arg1, Object arg2, Object arg3) {
 
@@ -100,6 +127,27 @@ public class DiagramListener implements IDiagramListener {
 		if (isStateDiagramUIModel(diagramUIModel)) {
 			SBVRToDomainModelValidator validator = initializeBVRToDomainModelValidator();
 			validateStateMachineElements(selectedElement, validator);
+		}
+
+		if (isBusinessRule(selectedElement)) {
+
+			// if created
+			IBusinessRule businessRule = (IBusinessRule) selectedElement;
+			businessRule.setUserID("");
+
+			SBVRToBusinessRulesValidator validator = initializeSBVRToBusinessRulesValidator();
+			validateBusinessRule(businessRule, validator);
+		}
+
+	}
+
+	private void validateBusinessRule(IBusinessRule businessRule, SBVRToBusinessRulesValidator validator) {
+
+		String ownId = businessRule.getName();
+		ValidationResult validationResult = validator.validateBusinessRule(ownId);
+
+		if (validationResult != null) {
+			_viewManager.showMessage(validationResult.getMessage());
 		}
 
 	}
@@ -131,6 +179,18 @@ public class DiagramListener implements IDiagramListener {
 		for (ValidationResult result : validationResultForSelectedElement) {
 			_viewManager.showMessage(result.getMessage());
 		}
+	}
+
+	private boolean isBusinessRule(IModelElement selectedElement) {
+		return selectedElement instanceof IBusinessRule;
+	}
+
+	private boolean isBusinessRuleGroup(IModelElement selectedElement) {
+		return selectedElement instanceof IBusinessRuleGroup;
+	}
+
+	private boolean isBusinessRuleAssociation(IModelElement selectedElement) {
+		return selectedElement instanceof IBusinessRuleAssociation;
 	}
 
 	private void validateBPMNElements(IModelElement selectedElement) {
@@ -169,6 +229,18 @@ public class DiagramListener implements IDiagramListener {
 			validationResult = eventValidator.validate((IBPEndEvent) selectedElement);
 		}
 		return validationResult;
+
+	}
+
+	private SBVRToBusinessRulesValidator initializeSBVRToBusinessRulesValidator() {
+		SBVRFileConnector sbvrConnector = new SBVRFileConnector();
+		SBVRFileElementsContainer sbvrContainer = null;
+		try {
+			sbvrContainer = sbvrConnector.loadSBVRData();
+		} catch (IOException e) {
+
+		}
+		return new SBVRToBusinessRulesValidator(sbvrContainer);
 	}
 
 	private SBVRToDomainModelValidator initializeBVRToDomainModelValidator() {

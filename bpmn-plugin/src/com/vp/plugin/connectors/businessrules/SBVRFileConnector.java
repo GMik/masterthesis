@@ -154,14 +154,17 @@ public class SBVRFileConnector implements ISBVRFileConnector {
 					break;
 				case SBVRFileConstants.TYPE_BUSINESS_RULE:
 
-					String text = data;
+					String[] idAndData = data.split(SBVRFileConstants.DATA_SEPARATOR);
+					String id = idAndData[0];
+					String text = idAndData[1];
+
 					Object matchingFact = retrieveFact(text, container);
 
 					SBVRBusinessRulePart businessRulePart = null;
 					if (matchingFact instanceof SBVRFact) {
 						businessRulePart = new SBVRBusinessRulePart((SBVRFact) matchingFact, null);
 						SBVRBusinessRule businessRule = new SBVRBusinessRule(text,
-								Collections.singletonList(businessRulePart));
+								Collections.singletonList(businessRulePart), id);
 						container.add(businessRule);
 
 						break;
@@ -170,7 +173,7 @@ public class SBVRFileConnector implements ISBVRFileConnector {
 					else if (matchingFact instanceof SBVRClassCharacteristicFact) {
 						businessRulePart = new SBVRBusinessRulePart(null, (SBVRClassCharacteristicFact) matchingFact);
 						SBVRBusinessRule businessRule = new SBVRBusinessRule(text,
-								Collections.singletonList(businessRulePart));
+								Collections.singletonList(businessRulePart), id);
 						container.add(businessRule);
 
 						break;
