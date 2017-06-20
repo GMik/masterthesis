@@ -1,6 +1,8 @@
 package com.vp.plugin.testingfeatures;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -106,37 +108,46 @@ public class DiagramListener implements IDiagramListener {
 
 	}
 
+	private LocalDateTime lastChange = LocalDateTime.now();
+
 	@Override
 	public void diagramUIModelPropertyChanged(IDiagramUIModel diagramUIModel, String arg1, Object arg2, Object arg3) {
 
-		IModelElement selectedElement = retrieveSelectedElement() == null ? null
-				: retrieveSelectedElement().getMetaModelElement();
-		if (selectedElement == null) {
-			return;
-		}
+		LocalDateTime now = LocalDateTime.now();
+		long difference = ChronoUnit.SECONDS.between(lastChange, now);
 
-		if (isClassDiagramUIModel(diagramUIModel)) {
-			SBVRToDomainModelValidator validator = initializeBVRToDomainModelValidator();
-			validateClassDiagramElements(selectedElement, validator);
-		}
+		if (difference > 1) {
 
-		if (isBusinessProcessDiagramUIModel(diagramUIModel)) {
-			validateBPMNElements(selectedElement);
-		}
+			IModelElement selectedElement = retrieveSelectedElement() == null ? null
+					: retrieveSelectedElement().getMetaModelElement();
+			if (selectedElement == null) {
+				return;
+			}
 
-		if (isStateDiagramUIModel(diagramUIModel)) {
-			SBVRToDomainModelValidator validator = initializeBVRToDomainModelValidator();
-			validateStateMachineElements(selectedElement, validator);
-		}
+			if (isClassDiagramUIModel(diagramUIModel)) {
+				SBVRToDomainModelValidator validator = initializeBVRToDomainModelValidator();
+				validateClassDiagramElements(selectedElement, validator);
+			}
 
-		if (isBusinessRule(selectedElement)) {
+			if (isBusinessProcessDiagramUIModel(diagramUIModel)) {
+				validateBPMNElements(selectedElement);
+			}
 
-			// if created
-			IBusinessRule businessRule = (IBusinessRule) selectedElement;
-			businessRule.setUserID("");
+			if (isStateDiagramUIModel(diagramUIModel)) {
+				SBVRToDomainModelValidator validator = initializeBVRToDomainModelValidator();
+				validateStateMachineElements(selectedElement, validator);
+			}
 
-			SBVRToBusinessRulesValidator validator = initializeSBVRToBusinessRulesValidator();
-			validateBusinessRule(businessRule, validator);
+			if (isBusinessRule(selectedElement)) {
+
+				// if created
+				IBusinessRule businessRule = (IBusinessRule) selectedElement;
+				businessRule.setUserID("");
+
+				SBVRToBusinessRulesValidator validator = initializeSBVRToBusinessRulesValidator();
+				validateBusinessRule(businessRule, validator);
+			}
+
 		}
 
 	}

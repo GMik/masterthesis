@@ -3,7 +3,7 @@ package com.vp.plugin.utils.validation.sbvr.to.dm;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vp.plugin.connectors.businessrules.SBVRClassCharacteristicFact;
+import com.vp.plugin.connectors.businessrules.innermodel.SBVRClassCharacteristicFact;
 import com.vp.plugin.connectors.domainmodel.br.facts.ClassFact;
 import com.vp.plugin.connectors.domainmodel.br.facts.StateFact;
 import com.vp.plugin.utils.validation.ValidationResult;
@@ -59,7 +59,6 @@ public class BRClassValidator {
 				String sbvrAttribute = sbvrClassCharacteristicFact.getClassCharacteristicTerm().getCharacteristicTerm();
 
 				if (dmClass.equals(sbvrClass) && dmAttribute.equals(sbvrAttribute)) {
-					System.out.println("Success - class and attribute - " + dmClass + ", " + dmAttribute);
 					matching = true;
 					break;
 				}

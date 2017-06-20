@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.vp.plugin.connectors.businessrules.CharacteristicKindOf;
-import com.vp.plugin.connectors.businessrules.RelationshipType;
-import com.vp.plugin.connectors.businessrules.SBVRClassCharacteristicFact;
-import com.vp.plugin.connectors.businessrules.SBVRFact;
 import com.vp.plugin.connectors.businessrules.SBVRFileElementsContainer;
+import com.vp.plugin.connectors.businessrules.innermodel.CharacteristicKindOf;
+import com.vp.plugin.connectors.businessrules.innermodel.RelationshipType;
+import com.vp.plugin.connectors.businessrules.innermodel.SBVRClassCharacteristicFact;
+import com.vp.plugin.connectors.businessrules.innermodel.SBVRFact;
 import com.vp.plugin.connectors.domainmodel.br.DomainModelSBVRRelevantElementsContainer;
 import com.vp.plugin.connectors.domainmodel.br.facts.AggregationKind;
 import com.vp.plugin.connectors.domainmodel.br.facts.ClassFact;

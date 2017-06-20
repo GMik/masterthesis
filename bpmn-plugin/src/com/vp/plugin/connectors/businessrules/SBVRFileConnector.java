@@ -12,6 +12,16 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.vp.plugin.connectors.businessrules.innermodel.CharacteristicKindOf;
+import com.vp.plugin.connectors.businessrules.innermodel.ClassAttributeRelationship;
+import com.vp.plugin.connectors.businessrules.innermodel.ClassStateRelationship;
+import com.vp.plugin.connectors.businessrules.innermodel.RelationshipType;
+import com.vp.plugin.connectors.businessrules.innermodel.SBVRBusinessRule;
+import com.vp.plugin.connectors.businessrules.innermodel.SBVRBusinessRulePart;
+import com.vp.plugin.connectors.businessrules.innermodel.SBVRClassCharacteristicFact;
+import com.vp.plugin.connectors.businessrules.innermodel.SBVRClassCharacteristicTerm;
+import com.vp.plugin.connectors.businessrules.innermodel.SBVRFact;
+import com.vp.plugin.connectors.businessrules.innermodel.SBVRTerm;
 import com.vp.plugin.utils.validation.ValidationResult;
 import com.vp.plugin.utils.validation.br.BRValidationMessages;
 
@@ -208,17 +218,64 @@ public class SBVRFileConnector implements ISBVRFileConnector {
 
 	private Object retrieveFact(String text, SBVRFileElementsContainer container) {
 
-		if (text.equals("Task is owned by Story")) {
-			System.out.println();
+		// String[] textSplitted = text.split(" ");
+		//
+		// for (SBVRFact fact : container.getFacts()) {
+		//
+		// String[] factWords = fact.getFactWords();
+		//
+		// // must be equal to factWords length
+		// int matchingWordsCounter = 0;
+		// if (factWords.length <= textSplitted.length) {
+		// int factWordsIndex = 0;
+		// for (int i = 0; i < textSplitted.length; i++) {
+		// if (factWords[factWordsIndex].equals(textSplitted[i])) {
+		// matchingWordsCounter++;
+		// factWordsIndex++;
+		// }
+		// }
+		// }
+		// if (matchingWordsCounter == factWords.length) {
+		// return fact;
+		// }
+		// }
+		//
+		// for (SBVRClassCharacteristicFact characteristicFact :
+		// container.getCharacteristicFacts()) {
+		// String[] factWords = characteristicFact.getFactWords();
+		// int matchingWordsCounter = 0;
+		// if (factWords.length <= textSplitted.length) {
+		// int factWordsIndex = 0;
+		// for (int i = 0; i < textSplitted.length; i++) {
+		// if (factWords[factWordsIndex].equals(textSplitted[i])) {
+		// matchingWordsCounter++;
+		// factWordsIndex++;
+		// }
+		// }
+		// }
+		// if (matchingWordsCounter == factWords.length) {
+		// return characteristicFact;
+		// }
+		// }
+		//
+		// return null;
+
+		Object result = null;
+		result = retrieveFactFromSBVRFacts(text, container.getFacts());
+		if (result != null) {
+			return result;
 		}
+		return retrieveFactFromSBVRClassCharacteristicFacts(text, container.getCharacteristicFacts());
 
-		String[] textSplitted = text.split(" ");
+	}
 
-		for (SBVRFact fact : container.getFacts()) {
+	private Object retrieveFactFromSBVRFacts(String businessRuleText, List<SBVRFact> sbvrFacts) {
+
+		String[] textSplitted = businessRuleText.split(" ");
+		for (SBVRFact fact : sbvrFacts) {
 
 			String[] factWords = fact.getFactWords();
 
-			// must be equal to factWords length
 			int matchingWordsCounter = 0;
 			if (factWords.length <= textSplitted.length) {
 				int factWordsIndex = 0;
@@ -233,9 +290,17 @@ public class SBVRFileConnector implements ISBVRFileConnector {
 				return fact;
 			}
 		}
+		return null;
+	}
 
-		for (SBVRClassCharacteristicFact characteristicFact : container.getCharacteristicFacts()) {
-			String[] factWords = characteristicFact.getFactWords();
+	private Object retrieveFactFromSBVRClassCharacteristicFacts(String businessRuleText,
+			List<SBVRClassCharacteristicFact> sbvrFacts) {
+
+		String[] textSplitted = businessRuleText.split(" ");
+		for (SBVRClassCharacteristicFact fact : sbvrFacts) {
+
+			String[] factWords = fact.getFactWords();
+
 			int matchingWordsCounter = 0;
 			if (factWords.length <= textSplitted.length) {
 				int factWordsIndex = 0;
@@ -247,12 +312,10 @@ public class SBVRFileConnector implements ISBVRFileConnector {
 				}
 			}
 			if (matchingWordsCounter == factWords.length) {
-				return characteristicFact;
+				return fact;
 			}
 		}
-
 		return null;
-
 	}
 
 	private SBVRClassCharacteristicTerm findAttributeTerm(SBVRFileElementsContainer container, String possibleTerm1,

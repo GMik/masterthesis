@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.vp.plugin.connectors.businessrules.RelationshipType;
-import com.vp.plugin.connectors.businessrules.SBVRFact;
 import com.vp.plugin.connectors.businessrules.SBVRFileElementsContainer;
+import com.vp.plugin.connectors.businessrules.innermodel.RelationshipType;
+import com.vp.plugin.connectors.businessrules.innermodel.SBVRFact;
 import com.vp.plugin.connectors.domainmodel.br.DomainModelSBVRRelevantElementsContainer;
 import com.vp.plugin.connectors.domainmodel.br.facts.GeneralizationFact;
 import com.vp.plugin.utils.validation.ValidationResult;

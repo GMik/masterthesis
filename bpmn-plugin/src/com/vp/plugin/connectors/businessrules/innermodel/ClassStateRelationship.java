@@ -1,4 +1,4 @@
-package com.vp.plugin.connectors.businessrules;
+package com.vp.plugin.connectors.businessrules.innermodel;
 
 public enum ClassStateRelationship {
 	HAS_STATE("has state"), IS_STATE_OF("is state of");

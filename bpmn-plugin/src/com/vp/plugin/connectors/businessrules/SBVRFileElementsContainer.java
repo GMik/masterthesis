@@ -3,6 +3,11 @@ package com.vp.plugin.connectors.businessrules;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.vp.plugin.connectors.businessrules.innermodel.SBVRBusinessRule;
+import com.vp.plugin.connectors.businessrules.innermodel.SBVRClassCharacteristicFact;
+import com.vp.plugin.connectors.businessrules.innermodel.SBVRClassCharacteristicTerm;
+import com.vp.plugin.connectors.businessrules.innermodel.SBVRFact;
+import com.vp.plugin.connectors.businessrules.innermodel.SBVRTerm;
 import com.vp.plugin.utils.validation.ValidationResult;
 
 public class SBVRFileElementsContainer {

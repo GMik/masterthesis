@@ -5,13 +5,13 @@ import java.util.List;
 
 import com.vp.plugin.ApplicationManager;
 import com.vp.plugin.ProjectManager;
-import com.vp.plugin.connectors.businessrules.CharacteristicKindOf;
-import com.vp.plugin.connectors.businessrules.SBVRClassCharacteristicFact;
-import com.vp.plugin.connectors.businessrules.SBVRClassCharacteristicTerm;
-import com.vp.plugin.connectors.businessrules.SBVRFact;
 import com.vp.plugin.connectors.businessrules.SBVRFileConnector;
 import com.vp.plugin.connectors.businessrules.SBVRFileElementsContainer;
-import com.vp.plugin.connectors.businessrules.SBVRTerm;
+import com.vp.plugin.connectors.businessrules.innermodel.CharacteristicKindOf;
+import com.vp.plugin.connectors.businessrules.innermodel.SBVRClassCharacteristicFact;
+import com.vp.plugin.connectors.businessrules.innermodel.SBVRClassCharacteristicTerm;
+import com.vp.plugin.connectors.businessrules.innermodel.SBVRFact;
+import com.vp.plugin.connectors.businessrules.innermodel.SBVRTerm;
 import com.vp.plugin.connectors.domainmodel.VPDomainModelConnector;
 import com.vp.plugin.connectors.domainmodel.br.DomainModelSBVRRelevantElementsContainer;
 import com.vp.plugin.model.IBRKeyword;

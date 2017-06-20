@@ -6,10 +6,10 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.vp.plugin.connectors.businessrules.RelationshipType;
-import com.vp.plugin.connectors.businessrules.SBVRFact;
 import com.vp.plugin.connectors.businessrules.SBVRFileElementsContainer;
-import com.vp.plugin.connectors.businessrules.SBVRTerm;
+import com.vp.plugin.connectors.businessrules.innermodel.RelationshipType;
+import com.vp.plugin.connectors.businessrules.innermodel.SBVRFact;
+import com.vp.plugin.connectors.businessrules.innermodel.SBVRTerm;
 import com.vp.plugin.connectors.domainmodel.br.DomainModelSBVRRelevantElementsContainer;
 import com.vp.plugin.connectors.domainmodel.br.facts.AggregationKind;
 import com.vp.plugin.connectors.domainmodel.br.facts.RelationshipFact;

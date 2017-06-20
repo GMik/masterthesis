@@ -2,7 +2,7 @@ package com.vp.plugin.utils.validation.br;
 
 public class BRValidationMessages {
 
-	public static final String BR_IS_NOT_BASES_ON_A_FACT = "Business rule {0} is not linked with any of facts";
+	public static final String BR_IS_NOT_BASES_ON_A_FACT = "Business rule {0} is not linked with any fact";
 
 	public static final String CLASS_ATTR_OR_STATE_TERM_IS_NOT_BASED_ON_TERM = "Class-term {0} for attribute/state term {1} does not exist";
 

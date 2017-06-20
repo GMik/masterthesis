@@ -2,8 +2,8 @@ package com.vp.plugin.connectors.businessrules.utils;
 
 import java.util.Objects;
 
-import com.vp.plugin.connectors.businessrules.SBVRBusinessRule;
 import com.vp.plugin.connectors.businessrules.SBVRFileElementsContainer;
+import com.vp.plugin.connectors.businessrules.innermodel.SBVRBusinessRule;
 
 public class BRToFactMatcher {
 

@@ -3,6 +3,8 @@ package com.vp.plugin.connectors.businessrules;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.vp.plugin.connectors.businessrules.innermodel.RelationshipType;
+
 public class RelationshipSelector {
 
 	private static final Map<String, RelationshipType> map = new HashMap<>();

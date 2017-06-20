@@ -1,4 +1,4 @@
-package com.vp.plugin.connectors.businessrules;
+package com.vp.plugin.connectors.businessrules.innermodel;
 
 public class SBVRTerm {
 
