@@ -89,7 +89,9 @@ public class BRAssociationAllKindsValidator {
 			if (!matching) {
 				validationResults.add(new ValidationResult(false,
 						message(DMToSBVRValidationMessages.DOMAIN_MODEL_ELEMENT_HAS_NO_MATCHING_BR,
-								associationFact.toString())));
+								associationFact.toString().replaceFirst("None", "Association")
+										.replaceFirst("Composited", "Composition")
+										.replaceFirst("Aggregated", "Aggregation"))));
 			}
 		}
 		return validationResults;

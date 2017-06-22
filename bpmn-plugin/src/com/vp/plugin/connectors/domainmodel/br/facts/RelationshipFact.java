@@ -97,7 +97,7 @@ public class RelationshipFact extends Fact {
 
 	@Override
 	public String toString() {
-		return aggregationKind + " - " + verb + "(" + this.leftTerm + "(role: " + leftTermRole + ")" + ","
+		return aggregationKind.getValue() + " - " + verb + "(" + this.leftTerm + "(role: " + leftTermRole + ")" + ","
 				+ this.rightTerm + "(role: " + rightTermRole + "))";
 	}
 

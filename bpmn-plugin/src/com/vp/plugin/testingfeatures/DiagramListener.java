@@ -116,38 +116,39 @@ public class DiagramListener implements IDiagramListener {
 		LocalDateTime now = LocalDateTime.now();
 		long difference = ChronoUnit.SECONDS.between(lastChange, now);
 
-		if (difference > 1) {
+		lastChange = now;
+		if (difference < 1) {
+			return;
+		}
 
-			IModelElement selectedElement = retrieveSelectedElement() == null ? null
-					: retrieveSelectedElement().getMetaModelElement();
-			if (selectedElement == null) {
-				return;
-			}
+		IModelElement selectedElement = retrieveSelectedElement() == null ? null
+				: retrieveSelectedElement().getMetaModelElement();
+		if (selectedElement == null) {
+			return;
+		}
 
-			if (isClassDiagramUIModel(diagramUIModel)) {
-				SBVRToDomainModelValidator validator = initializeBVRToDomainModelValidator();
-				validateClassDiagramElements(selectedElement, validator);
-			}
+		if (isClassDiagramUIModel(diagramUIModel)) {
+			SBVRToDomainModelValidator validator = initializeBVRToDomainModelValidator();
+			validateClassDiagramElements(selectedElement, validator);
+		}
 
-			if (isBusinessProcessDiagramUIModel(diagramUIModel)) {
-				validateBPMNElements(selectedElement);
-			}
+		if (isBusinessProcessDiagramUIModel(diagramUIModel)) {
+			validateBPMNElements(selectedElement);
+		}
 
-			if (isStateDiagramUIModel(diagramUIModel)) {
-				SBVRToDomainModelValidator validator = initializeBVRToDomainModelValidator();
-				validateStateMachineElements(selectedElement, validator);
-			}
+		if (isStateDiagramUIModel(diagramUIModel)) {
+			SBVRToDomainModelValidator validator = initializeBVRToDomainModelValidator();
+			validateStateMachineElements(selectedElement, validator);
+		}
 
-			if (isBusinessRule(selectedElement)) {
+		if (isBusinessRule(selectedElement)) {
 
-				// if created
-				IBusinessRule businessRule = (IBusinessRule) selectedElement;
-				businessRule.setUserID("");
+			// if created
+			IBusinessRule businessRule = (IBusinessRule) selectedElement;
+			businessRule.setUserID("");
 
-				SBVRToBusinessRulesValidator validator = initializeSBVRToBusinessRulesValidator();
-				validateBusinessRule(businessRule, validator);
-			}
-
+			SBVRToBusinessRulesValidator validator = initializeSBVRToBusinessRulesValidator();
+			validateBusinessRule(businessRule, validator);
 		}
 
 	}
