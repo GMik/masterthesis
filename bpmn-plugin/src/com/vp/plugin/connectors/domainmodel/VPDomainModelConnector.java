@@ -21,9 +21,13 @@ import com.vp.plugin.connectors.domainmodel.br.facts.RelationshipFact;
 import com.vp.plugin.connectors.domainmodel.br.facts.RelationshipFact.RelationshipFactBuilder;
 import com.vp.plugin.connectors.domainmodel.br.facts.StateFact;
 import com.vp.plugin.connectors.domainmodel.br.terms.Term;
+import com.vp.plugin.model.IActor;
 import com.vp.plugin.model.IAssociation;
 import com.vp.plugin.model.IAssociationEnd;
 import com.vp.plugin.model.IAttribute;
+import com.vp.plugin.model.IBPDataStore;
+import com.vp.plugin.model.IBPLane;
+import com.vp.plugin.model.IBPPool;
 import com.vp.plugin.model.IClass;
 import com.vp.plugin.model.IGeneralization;
 import com.vp.plugin.model.IModelElement;
@@ -31,6 +35,72 @@ import com.vp.plugin.model.IState2;
 import com.vp.plugin.model.factory.IModelElementFactory;
 
 public class VPDomainModelConnector implements IVPDomainModelConnector {
+
+	public List<String> fetchPackages() {
+		List<String> packages = new ArrayList<>();
+
+		IModelElement[] elements = ApplicationManager.instance().getProjectManager().getProject()
+				.toAllLevelModelElementArray(IModelElementFactory.MODEL_TYPE_PACKAGE);
+
+		for (IModelElement element : elements) {
+			packages.add(element.getName());
+		}
+		return packages;
+	}
+
+	public List<IBPDataStore> fetchDatastores() {
+		List<IBPDataStore> datastores = new ArrayList<>();
+
+		IModelElement[] elements = ApplicationManager.instance().getProjectManager().getProject()
+				.toAllLevelModelElementArray(IModelElementFactory.MODEL_TYPE_BP_DATA_STORE);
+
+		for (IModelElement element : elements) {
+			IBPDataStore ds = (IBPDataStore) element;
+			datastores.add(ds);
+		}
+		return datastores;
+	}
+
+	public List<IBPLane> fetchLanes() {
+		List<IBPLane> lanes = new ArrayList<>();
+
+		IModelElement[] elements = ApplicationManager.instance().getProjectManager().getProject()
+				.toAllLevelModelElementArray(IModelElementFactory.MODEL_TYPE_BP_LANE);
+
+		for (IModelElement element : elements) {
+			IBPLane lane = (IBPLane) element;
+			lanes.add(lane);
+		}
+		return lanes;
+	}
+
+	public List<IBPPool> fetchPools() {
+		List<IBPPool> pools = new ArrayList<>();
+
+		IModelElement[] elements = ApplicationManager.instance().getProjectManager().getProject()
+				.toAllLevelModelElementArray(IModelElementFactory.MODEL_TYPE_BP_POOL);
+
+		for (IModelElement element : elements) {
+			IBPPool pool = (IBPPool) element;
+			pools.add(pool);
+		}
+		return pools;
+	}
+
+	public List<IActor> fetchActors() {
+
+		List<IActor> actors = new ArrayList<>();
+
+		IModelElement[] elements = ApplicationManager.instance().getProjectManager().getProject()
+				.toAllLevelModelElementArray(IModelElementFactory.MODEL_TYPE_ACTOR);
+
+		for (IModelElement element : elements) {
+			IActor actor = (IActor) element;
+			actors.add(actor);
+		}
+
+		return actors;
+	}
 
 	@Override
 	public List<StateMachine> fetchStateMachines() {
@@ -194,18 +264,22 @@ public class VPDomainModelConnector implements IVPDomainModelConnector {
 			AggregationKind aggregationKind = retrieveAggregationKind(associationEndFrom.getAggregationKind(),
 					associationEndTo.getAggregationKind());
 
-			String leftClass = associationEndFrom.getEndRelationship().getTo().getName();
-			String rightClass = associationEndFrom.getEndRelationship().getFrom().getName();
+			try {
+				String leftClass = associationEndFrom.getEndRelationship().getTo().getName();
+				String rightClass = associationEndFrom.getEndRelationship().getFrom().getName();
 
-			String leftMultiplicity = associationEndFrom.getMultiplicity();
-			String rightMultiplicity = associationEndTo.getMultiplicity();
+				String leftMultiplicity = associationEndFrom.getMultiplicity();
+				String rightMultiplicity = associationEndTo.getMultiplicity();
 
-			RelationshipFact relationshipFact = new RelationshipFactBuilder().leftTerm(new Term(leftClass))
-					.leftRole(fromRole).rightRole(toRole).leftMultiplicity(leftMultiplicity).verb(association.getName())
-					.rightMultiplicity(rightMultiplicity).rightTerm(new Term(rightClass))
-					.aggregationKind(aggregationKind).build();
+				RelationshipFact relationshipFact = new RelationshipFactBuilder().leftTerm(new Term(leftClass))
+						.leftRole(fromRole).rightRole(toRole).leftMultiplicity(leftMultiplicity)
+						.verb(association.getName()).rightMultiplicity(rightMultiplicity)
+						.rightTerm(new Term(rightClass)).aggregationKind(aggregationKind).build();
 
-			relationshipFacts.add(relationshipFact);
+				relationshipFacts.add(relationshipFact);
+			} catch (NullPointerException e) {
+				// do nothing
+			}
 
 		}
 

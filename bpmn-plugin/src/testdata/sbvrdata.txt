@@ -22,7 +22,6 @@ Fact:Task;possess;TaskStatus
 Fact:Administrator;extends;User
 Fact:User;is extended by;StoryOwner
 Fact:Task;is owned by;Story
-Fact:Story;cancels;Task
 Fact:StoryOwner;owns;Story
 
 ClassCharacteristicFact:User;has;firstname

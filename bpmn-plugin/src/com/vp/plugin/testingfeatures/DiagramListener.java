@@ -5,12 +5,14 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.vp.plugin.ApplicationManager;
 import com.vp.plugin.ViewManager;
 import com.vp.plugin.connectors.businessrules.SBVRFileConnector;
 import com.vp.plugin.connectors.businessrules.SBVRFileElementsContainer;
+import com.vp.plugin.connectors.domainmodel.StateMachine;
 import com.vp.plugin.connectors.domainmodel.VPDomainModelConnector;
 import com.vp.plugin.connectors.domainmodel.br.DomainModelSBVRRelevantElementsContainer;
 import com.vp.plugin.diagram.IBusinessProcessDiagramUIModel;
@@ -19,11 +21,19 @@ import com.vp.plugin.diagram.IDiagramElement;
 import com.vp.plugin.diagram.IDiagramListener;
 import com.vp.plugin.diagram.IDiagramUIModel;
 import com.vp.plugin.diagram.IStateDiagramUIModel;
+import com.vp.plugin.model.IActor;
 import com.vp.plugin.model.IAssociation;
 import com.vp.plugin.model.IAssociationEnd;
+import com.vp.plugin.model.IBPDataInput;
 import com.vp.plugin.model.IBPDataObject;
+import com.vp.plugin.model.IBPDataObjectState;
+import com.vp.plugin.model.IBPDataOutput;
+import com.vp.plugin.model.IBPDataStore;
 import com.vp.plugin.model.IBPEndEvent;
+import com.vp.plugin.model.IBPGateway;
 import com.vp.plugin.model.IBPIntermediateEvent;
+import com.vp.plugin.model.IBPLane;
+import com.vp.plugin.model.IBPPool;
 import com.vp.plugin.model.IBPStartEvent;
 import com.vp.plugin.model.IBusinessRule;
 import com.vp.plugin.model.IBusinessRuleAssociation;
@@ -32,7 +42,9 @@ import com.vp.plugin.model.IClass;
 import com.vp.plugin.model.IGeneralization;
 import com.vp.plugin.model.IModel;
 import com.vp.plugin.model.IModelElement;
+import com.vp.plugin.model.IState2;
 import com.vp.plugin.model.factory.IModelElementFactory;
+import com.vp.plugin.utils.validation.BPValidationMessages;
 import com.vp.plugin.utils.validation.ValidationResult;
 import com.vp.plugin.utils.validation.bp.dataobjects.BPDataObjectValidator;
 import com.vp.plugin.utils.validation.bp.dataobjects.BPObjectStandardValidationStrategy;
@@ -47,6 +59,8 @@ public class DiagramListener implements IDiagramListener {
 
 	private static BPDataObjectValidator bpObjectValidator;
 
+	private static VPDomainModelConnector domainModelConnector;
+
 	ViewManager _viewManager = ApplicationManager.instance().getViewManager();
 
 	public DiagramListener() {
@@ -55,6 +69,7 @@ public class DiagramListener implements IDiagramListener {
 	static {
 		eventValidator = new BPEventValidator(new BPEventRestrictiveValidationStrategy());
 		bpObjectValidator = new BPDataObjectValidator(new BPObjectStandardValidationStrategy());
+		domainModelConnector = new VPDomainModelConnector();
 	}
 
 	@Override
@@ -132,9 +147,9 @@ public class DiagramListener implements IDiagramListener {
 			validateClassDiagramElements(selectedElement, validator);
 		}
 
-		if (isBusinessProcessDiagramUIModel(diagramUIModel)) {
-			validateBPMNElements(selectedElement);
-		}
+		// if (isBusinessProcessDiagramUIModel(diagramUIModel)) {
+		// validateBPMNElements(selectedElement);
+		// }
 
 		if (isStateDiagramUIModel(diagramUIModel)) {
 			SBVRToDomainModelValidator validator = initializeBVRToDomainModelValidator();
@@ -151,7 +166,218 @@ public class DiagramListener implements IDiagramListener {
 			validateBusinessRule(businessRule, validator);
 		}
 
+		// -- new
+
+		// DATA OBJECT
+		if (isBPMNDataObject(selectedElement)) {
+			ValidationResult result = validateBPMN_Data(selectedElement);
+			if (result != null) {
+				_viewManager.showMessage(result.getMessage());
+			}
+		}
+
+		// DATA INPUT
+		if (isBPMNDataInput(selectedElement)) {
+			ValidationResult result = validateBPMN_Data(selectedElement);
+			if (result != null) {
+				_viewManager.showMessage(result.getMessage());
+			}
+		}
+
+		// DATA OUTPUT
+		if (isBPMNDataOutput(selectedElement)) {
+			ValidationResult result = validateBPMN_Data(selectedElement);
+			if (result != null) {
+				_viewManager.showMessage(result.getMessage());
+			}
+		}
+
+		// DATA STORE
+		if (isBPMNDataStore(selectedElement)) {
+			ValidationResult result = validateDatastore(selectedElement);
+			if (result != null) {
+				_viewManager.showMessage(result.getMessage());
+			}
+		}
+
+		// POOL
+		if (isBPMNPool(selectedElement)) {
+			ValidationResult result = validateBPMNPool(selectedElement.getName());
+			if (result != null) {
+				_viewManager.showMessage(result.getMessage());
+			}
+		}
+
+		// LANE
+		if (isBPMNLane(selectedElement)) {
+			ValidationResult result = validateBPMNLane(selectedElement.getName());
+			if (result != null) {
+				_viewManager.showMessage(result.getMessage());
+			}
+		}
+
 	}
+
+	private boolean statesContains(StateMachine sm, String uistate) {
+		for (IState2 state : sm.getStates()) {
+			if (state.getName().equals(uistate)) {
+				return true;
+			}
+		}
+		return false;
+
+	}
+
+	private ValidationResult validateDatastore(IModelElement object) {
+		String className = object.getName();
+		Set<IClass> classes = domainModelConnector.fetchClassesWithGivenName(className);
+
+		if (classes.isEmpty()) {
+			return new ValidationResult(false,
+					message("Warning: class with given name {0} is not defined for datastore.", className));
+		} else {
+			return null;
+		}
+
+	}
+
+	private ValidationResult validateBPMN_Data(IModelElement object) {
+
+		String content = object.getName();
+		String className = null;
+		String state = null;
+
+		if (content.contains(" ") && content.contains("[") && content.contains("]")) {
+			String[] parts = content.split(" ");
+			className = parts[0];
+			state = parts[1].substring(1, parts[1].length() - 1);
+
+			Set<IClass> classes = domainModelConnector.fetchClassesWithGivenName(className);
+
+			if (classes.isEmpty()) {
+				return new ValidationResult(false,
+						message("Warning: class with given name {0} is not defined.", className));
+				// nie ma klasy dla className - MESSAGE
+			} else {
+				List<StateMachine> smachines = domainModelConnector.fetchStateMachinesFor(className);
+
+				if (smachines.isEmpty()) {
+					return new ValidationResult(false, message(
+							"Warning: class with given name {0} is defined, but without state machine.", className));
+
+					// ........................
+				} else {
+
+					if (statesContains(smachines.get(0), state)) {
+						return null;
+					} else {
+						return new ValidationResult(false,
+								message("Warning: class with given name {0} is defined with state machine, but state machine does not have any state like {1} defined.",
+										className, state));
+					}
+
+				}
+			}
+
+		} else {
+			className = content;
+
+			Set<IClass> classes = domainModelConnector.fetchClassesWithGivenName(className);
+
+			if (classes.isEmpty()) {
+				return new ValidationResult(false,
+						message("Warning: class with given name {0} is not defined.", className));
+			} else {
+				List<StateMachine> smachines = domainModelConnector.fetchStateMachinesFor(className);
+
+				if (smachines.isEmpty()) {
+					return null;
+				} else {
+					return new ValidationResult(false,
+							message("Warning: class with given name {0} is defined with state machine.", className));
+				}
+			}
+
+		}
+
+	}
+
+	private String message(String message, String... params) {
+		String result = new String(message);
+		int position = 0;
+		for (String param : params) {
+			result = result.replace("{" + (position++) + "}", param);
+		}
+		return result;
+	}
+
+	private ValidationResult validateBPMNPool(String name) {
+		Set<IClass> classes = domainModelConnector.fetchClassesWithGivenName(name);
+		List<String> packages = domainModelConnector.fetchPackages();
+
+		boolean isCorrect = !packages.stream().filter(p -> name.equals(p)).collect(Collectors.toList()).isEmpty()
+				|| !classes.isEmpty();
+		return isCorrect ? null
+				: new ValidationResult(false, message(BPValidationMessages.FOR_GIVEN_POOL_PACKAGE_NOT_DEFINED, name));
+	}
+
+	private ValidationResult validateBPMNLane(String name) {
+		List<IActor> actors = domainModelConnector.fetchActors();
+		Set<IClass> classes = domainModelConnector.fetchClassesWithGivenName(name);
+
+		boolean isCorrect = !actors.stream().filter(a -> name.equals(a.getName())).collect(Collectors.toList())
+				.isEmpty() || !classes.isEmpty();
+
+		return isCorrect ? null
+				: new ValidationResult(false,
+						message(BPValidationMessages.FOR_GIVEN_LANE_ACTOR_OR_CLASS_NOT_DEFINED, name));
+	}
+
+	private ValidationResult validateBPMNDatastore(String name) {
+		List<IActor> actors = domainModelConnector.fetchActors();
+		Set<IClass> classes = domainModelConnector.fetchClassesWithGivenName(name);
+
+		boolean isCorrect = !actors.stream().filter(a -> name.equals(a.getName())).collect(Collectors.toList())
+				.isEmpty() || !classes.isEmpty();
+
+		return isCorrect ? null
+				: new ValidationResult(false,
+						message(BPValidationMessages.FOR_GIVEN_DATASTORE_ACTOR_OR_CLASS_NOT_DEFINED, name));
+	}
+
+	private boolean isBPMNDataObject(IModelElement selectedElement) {
+		return selectedElement instanceof IBPDataObject;
+	}
+
+	private boolean isBPMNGateway(IModelElement selectedElement) {
+		return selectedElement instanceof IBPGateway;
+	}
+
+	private boolean isBPMNPool(IModelElement selectedElement) {
+		return selectedElement instanceof IBPPool;
+	}
+
+	private boolean isBPMNLane(IModelElement selectedElement) {
+		return selectedElement instanceof IBPLane;
+	}
+
+	private boolean isBPMNDataStore(IModelElement selectedElement) {
+		return selectedElement instanceof IBPDataStore;
+	}
+
+	private boolean isBPMNDataInput(IModelElement selectedElement) {
+		return selectedElement instanceof IBPDataInput;
+	}
+
+	private boolean isBPMNDataOutput(IModelElement selectedElement) {
+		return selectedElement instanceof IBPDataOutput;
+	}
+
+	private boolean isBPMNDataObjectState(IModelElement selectedElement) {
+		return selectedElement instanceof IBPDataObjectState;
+	}
+
+	// private boolean
 
 	private void validateBusinessRule(IBusinessRule businessRule, SBVRToBusinessRulesValidator validator) {
 
@@ -164,10 +390,20 @@ public class DiagramListener implements IDiagramListener {
 
 	}
 
+	private List<ValidationResult> validateClassName(String name) {
+		Set<IClass> classes = domainModelConnector.fetchClassesWithGivenName(name);
+		List<ValidationResult> results = new ArrayList<>();
+		if (classes.isEmpty()) {
+			results.add(new ValidationResult(false,
+					message("Given class: {0} has no referencing term in SBVR rules", name)));
+		}
+
+		return results;
+	}
+
 	private void validateClassDiagramElements(IModelElement selectedElement, SBVRToDomainModelValidator validator) {
 
 		List<ValidationResult> validationResults = new ArrayList<>();
-
 		validationResults.addAll(validator.validateClassAttributes());
 		if (isClass(selectedElement)) {
 			validationResults.addAll(validator.validateAssociations());
